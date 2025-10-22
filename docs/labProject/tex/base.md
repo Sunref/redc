@@ -1,8 +1,0 @@
-# Implementação de Servidor
-
-```mermaid
-
-
-
-
-``` 

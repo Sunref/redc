@@ -9,3 +9,17 @@ Each group must present the results of their practical project, which consists o
 - Provide, via the network, an open-source web application from one of the following categories: ERP, CRM, CMS, or LMS.
 - All systems and services must be installed by the group members.
 - Submit a document detailing the step-by-step process performed, or optionally, a link to a video demonstrating the process.
+
+---
+
+# Diretrizes do Projeto (pt-BR)
+
+Cada grupo deve apresentar os resultados do seu projeto prático, que consiste em instalar e configurar um servidor Linux ou BSD de acordo com os seguintes requisitos:
+
+- O servidor deve ser acessível a partir da rede do laboratório de informática.
+- Instalar e configurar um SGBD funcional.     ~~> mariadb/mysql
+- Hospedar uma aplicação Java Web que acesse o banco de dados (por exemplo, usando Apache Tomcat).
+- Instalar um servidor HTTP com suporte a PHP e integração com banco de dados (por exemplo, Apache HTTP ou Nginx).
+- Disponibilizar, via rede, uma aplicação web open-source de uma das seguintes categorias: ERP, CRM, CMS ou LMS.
+- Todos os sistemas e serviços devem ser instalados pelos membros do grupo.
+- Entregar um documento detalhando o passo a passo realizado ou, opcionalmente, um link para um vídeo demonstrando o processo.

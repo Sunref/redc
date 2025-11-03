@@ -1,6 +1,32 @@
 services:
-  nginx:
+  web:
+    image: nginx:latest
+    networks:
+      - backend
+    ports:
+      - "8080:80" # porta externa:interna
+    volumes:
+      - ./templates:/etc/nginx/templates
+      - ./html:/usr/share/nginx/html
     env_file:
-      - ../config/.env
-    enviroment:
-      - NGINX_PORT=${NGINX_PORT}
+      - ./config/nginx.env
+    command: ["nginx-debug", "-g", "daemon off;"]
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mariadb:latest
+    restart: unless-stopped
+    networks:
+      - backend
+    env_file:
+      - ./config/db.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data:/var/lib/mysql
+
+networks:
+  backend:
+    driver: bridge

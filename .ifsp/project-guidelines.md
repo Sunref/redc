@@ -3,7 +3,7 @@
 Each group must present the results of their practical project, which consists of installing and configuring a Linux or BSD server according to the following requirements:
 
 - The server must be accessible from the computer lab network.
-- Install and configure a functional DBMS.     ~~> mariadb/mysql
+- Install and configure a functional DBMS. ~~> mariadb/mysql
 - Host a Java Web application that accesses the database (e.g., using Apache Tomcat).
 - Install an HTTP server with support for PHP and database integration (e.g., Apache HTTP or Nginx).
 - Provide, via the network, an open-source web application from one of the following categories: ERP, CRM, CMS, or LMS.
@@ -16,10 +16,14 @@ Each group must present the results of their practical project, which consists o
 
 Cada grupo deve apresentar os resultados do seu projeto prático, que consiste em instalar e configurar um servidor Linux ou BSD de acordo com os seguintes requisitos:
 
-- O servidor deve ser acessível a partir da rede do laboratório de informática.
-- Instalar e configurar um SGBD funcional.     ~~> mariadb/mysql
-- Hospedar uma aplicação Java Web que acesse o banco de dados (por exemplo, usando Apache Tomcat).
-- Instalar um servidor HTTP com suporte a PHP e integração com banco de dados (por exemplo, Apache HTTP ou Nginx).
-- Disponibilizar, via rede, uma aplicação web open-source de uma das seguintes categorias: ERP, CRM, CMS ou LMS.
-- Todos os sistemas e serviços devem ser instalados pelos membros do grupo.
-- Entregar um documento detalhando o passo a passo realizado ou, opcionalmente, um link para um vídeo demonstrando o processo.
+- [ ] - O servidor deve ser acessível a partir da rede do laboratório de informática.
+
+- [x] Instalar e configurar um SGBD funcional. ~~> mariadb/mysq
+  - [ ] Configurar SGBD
+- [ ] - Hospedar uma aplicação Java Web que acesse o banco de dados (por exemplo, usando Apache Tomcat).
+  - [ ] - Fazer aplicação
+- [ ] - Instalar um servidor HTTP com suporte a PHP e integração com banco de dados (por exemplo, Apache HTTP ou Nginx).
+  - [ ] - Configurar Nginx
+
+[ ] - Disponibilizar, via rede, uma aplicação web open-source de uma das seguintes categorias: ERP, CRM, CMS ou LMS.
+[ ] - Entregar um documento detalhando o passo a passo realizado ou, opcionalmente, um link para um vídeo demonstrando o processo.

@@ -1,33 +1,70 @@
-# Docker Compose feito para orquestrar um servidor web.
+version: "3.9"
+
 services:
   web:
     image: nginx:latest
+    container_name: web
     networks:
       - backend
+      - moodle_net
     ports:
-      - "8080:80" # porta externa:interna
+      - "8080:80" # ÚNICO acesso externo permitido
     volumes:
-      - ./templates:/etc/nginx/templates # diretorio local:container
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       - ./html:/usr/share/nginx/html
     env_file:
       - ./config/nginx.env
     command: ["nginx-debug", "-g", "daemon off;"]
     depends_on:
       - db
+      - moodle
     restart: unless-stopped
 
   db:
     image: mariadb:latest
+    container_name: main-db
     restart: unless-stopped
     networks:
       - backend
     env_file:
       - ./config/db.env
     ports:
-      - "3306:3306"
+      - "3306:3306" # opcional — remova se não quiser acesso externo ao DB
     volumes:
-      - ./data:/var/lib/mysql
+      - main_db_data:/var/lib/mysql
+
+  moodle-db:
+    image: mariadb:10.6
+    container_name: moodle-db
+    restart: always
+    networks:
+      - moodle_net
+    env_file:
+      - ./config/moodle-db.env
+    volumes:
+      - moodle_db_data:/var/lib/mysql
+
+  moodle:
+    image: brandkern/moodle:4.5-latest
+    container_name: moodle
+    restart: always
+    networks:
+      - moodle_net
+    env_file:
+      - ./config/moodle.env
+    volumes:
+      - moodle_data:/var/www/moodledata
+      - ./apache/000-default.conf:/etc/apache2/sites-enabled/000-default.conf
+    depends_on:
+      - moodle-db
 
 networks:
   backend:
     driver: bridge
+  moodle_net:
+    driver: bridge
+
+volumes:
+  main_db_data:
+  moodle_db_data:
+  moodle_data:

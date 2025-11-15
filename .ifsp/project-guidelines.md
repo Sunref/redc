@@ -16,14 +16,14 @@ Each group must present the results of their practical project, which consists o
 
 Cada grupo deve apresentar os resultados do seu projeto prático, que consiste em instalar e configurar um servidor Linux ou BSD de acordo com os seguintes requisitos:
 
-- [ ] - O servidor deve ser acessível a partir da rede do laboratório de informática.
+- [x] - O servidor deve ser acessível a partir da rede do laboratório de informática.
 
 - [x] Instalar e configurar um SGBD funcional. ~~> mariadb/mysq
   - [ ] Configurar SGBD
 - [ ] - Hospedar uma aplicação Java Web que acesse o banco de dados (por exemplo, usando Apache Tomcat).
   - [ ] - Fazer aplicação
-- [X] - Instalar um servidor HTTP com suporte a PHP e integração com banco de dados (por exemplo, Apache HTTP ou Nginx).
-  - [X] - Configurar Nginx
+- [x] - Instalar um servidor HTTP com suporte a PHP e integração com banco de dados (por exemplo, Apache HTTP ou Nginx).
+  - [x] - Configurar Nginx
 
 [X] - Disponibilizar, via rede, uma aplicação web open-source de uma das seguintes categorias: ERP, CRM, CMS ou LMS.
 [ ] - Entregar um documento detalhando o passo a passo realizado ou, opcionalmente, um link para um vídeo demonstrando o processo.

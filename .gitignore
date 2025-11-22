@@ -6,3 +6,5 @@
 
 # Dev Crumbs directory
 .devcrumbs
+server/data
+server/data/*

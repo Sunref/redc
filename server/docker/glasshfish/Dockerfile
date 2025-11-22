@@ -1,1 +1,0 @@
-FROM  openeuler/glassfish:latest

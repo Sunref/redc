@@ -11,3 +11,4 @@ server/data/*
 
 /.gmm/*
 /.gmm
+server/config/config.env

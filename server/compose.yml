@@ -11,38 +11,64 @@ services:
       - "0.0.0.0:8080:80" # [HOST_IP_BIND:]HOST_PORT:CONTAINER_PORT
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./html:/usr/share/nginx/html
+      - ./web/public:/usr/share/nginx/html
     env_file:
-      - ./config/nginx.env
+      - ./config/config.env
     command: ["nginx-debug", "-g", "daemon off;"]
     depends_on:
       - moodle
+      - petclinic
     restart: unless-stopped
 
   moodle-db:
     image: mariadb:10.6
     container_name: moodle-db
-    restart: always
+    restart: unless-stopped
     networks:
       - moodle_net
     env_file:
-      - ./config/moodle-db.env
+      - ./config/config.env
     volumes:
       - moodle_db_data:/var/lib/mysql
 
   moodle:
     image: brandkern/moodle:4.5-latest
     container_name: moodle
-    restart: always
+    restart: unless-stopped
     networks:
       - moodle_net
     env_file:
-      - ./config/moodle.env
+      - ./config/config.env
     volumes:
       - moodle_data:/var/www/moodledata
       - ./apache/000-default.conf:/etc/apache2/sites-enabled/000-default.conf
     depends_on:
       - moodle-db
+
+  petclinic-db:
+    image: postgres:15-alpine
+    container_name: petclinic-db
+    restart: unless-stopped
+    networks:
+      - backend
+    env_file:
+      - ./config/config.env
+    volumes:
+      - petclinic_db_data:/var/lib/postgresql/data
+
+  petclinic:
+    build:
+      context: ./spring-petclinic
+      dockerfile: Dockerfile
+    image: local/petclinic:latest
+    container_name: petclinic
+    restart: unless-stopped
+    networks:
+      - backend
+    env_file:
+      - ./config/config.env
+    depends_on:
+      - petclinic-db
 
 networks:
   backend:
@@ -53,3 +79,4 @@ networks:
 volumes:
   moodle_db_data:
   moodle_data:
+  petclinic_db_data:

@@ -2,7 +2,7 @@ name: Deploy .github/pages to GitHub Pages
 
 on:
     push:
-        branches: [main, feat/web_v2]
+        branches: [main]
 
 jobs:
     deploy:

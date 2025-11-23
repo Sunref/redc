@@ -8,3 +8,7 @@
 .devcrumbs
 server/data
 server/data/*
+
+/.gmm/*
+/.gmm
+server/config/config.env

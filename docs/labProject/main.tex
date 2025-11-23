@@ -1,0 +1,274 @@
+\documentclass[12pt, a4paper]{article}
+
+% --- BLOCO DE PREÂMBULO UNIVERSAL ---
+\usepackage[a4paper, top=3cm, bottom=2cm, left=3cm, right=2cm]{geometry}
+\usepackage{fontspec}
+
+% Configuração de Idioma (Português do Brasil) e Hifenização
+\usepackage[brazilian, provide=*]{babel}
+\babelprovide[import, onchar=ids fonts]{brazilian}
+\babelprovide[import, onchar=ids fonts]{english}
+
+% Definição da Fonte Padrão (Noto Sans)
+\babelfont{rm}{Noto Sans}
+
+% Pacotes Adicionais
+\usepackage{enumitem}        
+\setlist[itemize]{label=-}   
+\usepackage{booktabs}        
+\usepackage{graphicx}        
+\usepackage{float}           
+\usepackage{listings}        
+\usepackage{xcolor}          
+\usepackage{titlesec}        
+\usepackage{hyperref}        
+\usepackage{microtype}       % Melhora a justificação do texto
+
+% Cores para Códigos
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codeblue}{rgb}{0,0,0.6}
+\definecolor{backcolour}{rgb}{0.96,0.96,0.96}
+
+% Definição da Linguagem YAML para Listings
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null,y,n},
+  keywordstyle=\color{codeblue}\bfseries,
+  basicstyle=\ttfamily\footnotesize,
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{codegreen}\ttfamily,
+  stringstyle=\color{magenta}\ttfamily,
+  moredelim=[l][\color{orange}]{\&},
+  moredelim=[l][\color{magenta}]{*},
+  moredelim=**[il][\color{red}]{:},
+  morestring=[b]',
+  morestring=[b]"
+}
+
+% Estilo para Listings (Código)
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{codeblue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{magenta},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,          
+    breaklines=true,                  
+    captionpos=b,                     
+    keepspaces=true,                  
+    numbers=left,                     
+    numbersep=5pt,                    
+    showspaces=false,                 
+    showstringspaces=false,
+    showtabs=false,                   
+    tabsize=2,
+    frame=single
+}
+\lstset{style=mystyle}
+
+% Configuração de Metadados
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Implementação e Configuração de Servidor Web},
+    pdfauthor={Fernanda Martins da Silva, Gabriel Maia Miguel, Samuel Oliveira Lopes},
+}
+
+% --- INÍCIO DO DOCUMENTO ---
+\begin{document}
+
+% --- CAPA ---
+\begin{titlepage}
+    \centering
+    {\Large \textbf{Instituto Federal de Educação, Ciência e Tecnologia de São Paulo}}\\[0.5cm]
+    {\large Campus São João da Boa Vista}\\[3cm]
+    
+    {\huge \textbf{Implementação e Configuração de um Servidor Web}}\\[0.5cm]
+    {\Large Abordagem Prática com Docker Compose, NGINX e Aplicações Open Source}\\[3cm]
+    
+    \textbf{Autores:}\\[0.5cm]
+    Fernanda Martins da Silva\\
+    Gabriel Maia Miguel\\
+    Samuel Oliveira Lopes\\[4cm]
+    
+    {\large \textbf{Relatório Técnico}}\\[0.5cm]
+    Unidade Curricular: Redes de Computadores\\[3cm]
+    
+    \vfill
+    Novembro de 2025
+\end{titlepage}
+
+% --- RESUMO ---
+\thispagestyle{plain}
+\begin{center}
+    \Large \textbf{Resumo}
+\end{center}
+\vspace{0.5cm}
+
+Este relatório detalha o processo de implementação e configuração de uma infraestrutura de servidores web baseada em microsserviços, utilizando tecnologias de código aberto (\textit{open source}) orquestradas via Docker. O projeto visa demonstrar a criação de um ambiente robusto e escalável, integrando Sistemas Gerenciadores de Banco de Dados (SGBD) heterogêneos (MariaDB 10.6 e PostgreSQL 15), um servidor \textit{gateway} e proxy reverso (NGINX), e aplicações web com pilhas tecnológicas distintas (Moodle 4.5 em PHP e Spring Petclinic em Java 25). A metodologia adotada privilegia a conteinerização com Docker Compose para assegurar a modularidade, o isolamento de redes e a portabilidade do ambiente. São apresentados os arquivos de configuração, as estratégias de otimização de imagens (\textit{multi-stage builds}) e a resolução de desafios relacionados ao roteamento de tráfego e persistência de dados.
+
+\vspace{0.5cm}
+\noindent \textbf{Palavras-chave:} Servidor Web, NGINX, Docker Compose, PostgreSQL, Moodle, Spring Boot, Microsserviços.
+
+\newpage
+\tableofcontents
+\newpage
+
+% --- CONTEÚDO ---
+
+\section{Introdução e Objetivos}
+\label{sec:objetivos}
+
+A ubiquidade das aplicações web modernas exige infraestruturas que sejam não apenas funcionais, mas também seguras, modulares e de fácil manutenção. Este projeto insere-se no contexto prático da disciplina de Laboratório de Redes de Computadores, visando consolidar conhecimentos sobre protocolos HTTP, gestão de bases de dados e orquestração de serviços.
+
+\subsection{Objetivo Geral}
+O objetivo primordial é demonstrar a implementação técnica de um servidor web capaz de hospedar múltiplas aplicações concorrentes, com diferentes requisitos de execução (\textit{runtime}), em um único ambiente coeso e acessível via rede local (LAN).
+
+\subsection{Objetivos Específicos}
+Para atingir o objetivo geral, a equipe definiu os seguintes passos:
+\begin{enumerate}
+    \item \textbf{Gestão de Dados:} Implementação e configuração de SGBDs relacionais distintos (MariaDB e PostgreSQL) em contêineres isolados.
+    \item \textbf{Aplicações Heterogêneas:}
+    \begin{itemize}
+        \item Hospedagem de uma aplicação Java Web (Spring Petclinic) utilizando as versões mais recentes do Java (v25).
+        \item Configuração de uma plataforma LMS (\textit{Learning Management System}) baseada em PHP (Moodle 4.5).
+    \end{itemize}
+    \item \textbf{Roteamento de Tráfego:} Configuração de um servidor NGINX atuando como Proxy Reverso para gerenciar as requisições na porta 8080 e distribuí-las pelos serviços internos.
+    \item \textbf{Documentação:} Elaboração técnica dos artefatos de configuração (\texttt{Dockerfile}, \texttt{compose.yml}, \texttt{nginx.conf}).
+\end{enumerate}
+
+\section{Fundamentação Teórica e Arquitetura}
+A solução foi desenhada seguindo o padrão de arquitetura de microsserviços, onde cada função do sistema é encapsulada na sua própria unidade de execução (contêiner).
+
+\subsection{Tecnologias Adotadas}
+A escolha das tecnologias baseou-se na estabilidade, suporte da comunidade e conformidade com padrões \textit{open source}. A Tabela \ref{tab:versoes} resume a pilha tecnológica extraída dos arquivos de configuração.
+
+\begin{table}[ht]
+    \centering
+    \caption{Versões e Tecnologias Utilizadas}
+    \label{tab:versoes}
+    \vspace{0.2cm}
+    \begin{tabular}{lp{6cm}l}
+        \toprule
+        \textbf{Serviço} & \textbf{Tecnologia/Imagem} & \textbf{Papel no Sistema} \\
+        \midrule
+        \textit{Web Gateway} & \texttt{nginx:latest} & Proxy Reverso e Estáticos \\
+        LMS App & \texttt{brandkern/moodle:4.5-latest} & Plataforma de Ensino \\
+        LMS DB & \texttt{mariadb:10.6} & Persistência para o Moodle \\
+        Java App & \texttt{eclipse-temurin:25} (Custom) & Aplicação Spring Petclinic \\
+        Java DB & \texttt{postgres:15-alpine} & Persistência para o Petclinic \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Topologia de Rede e Isolamento}
+
+Um aspecto crítico da segurança em Docker é o isolamento de redes. Em vez de utilizar a rede padrão (\textit{default bridge}), foram criadas duas redes internas distintas para garantir que as bases de dados sejam acessíveis apenas pelas suas respectivas aplicações:
+
+\begin{itemize}
+    \item \textbf{\texttt{backend}}: Rede dedicada à pilha Java. Conecta exclusivamente o NGINX, a aplicação Petclinic e a base de dados PostgreSQL.
+    \item \textbf{\texttt{moodle\_net}}: Rede dedicada à pilha PHP. Conecta exclusivamente o NGINX, o Moodle e a base de dados MariaDB.
+\end{itemize}
+
+O contêiner \texttt{web} (NGINX) é o único elemento da arquitetura conectado a ambas as redes, atuando como uma ponte de aplicação (\textit{Application Layer Gateway}) segura entre o mundo externo e os serviços internos.
+
+\section{Implementação Detalhada}
+
+\subsection{Roteamento (NGINX)}
+O NGINX foi configurado para ser o único ponto de contato com o mundo exterior, escutando na porta \textbf{8080}. A sua função de Proxy Reverso é vital para permitir que múltiplas aplicações compartilhem o mesmo endereço IP e porta. Além disso, foi configurado um volume específico para servir a documentação estática do projeto:
+\begin{lstlisting}[language=bash]
+./web/public:/usr/share/nginx/html
+\end{lstlisting}
+Esta diretiva mapeia os arquivos locais da equipe para o diretório padrão de publicação do servidor web.
+
+\section{Análise Detalhada dos Artefatos de Configuração}
+Nesta seção, a equipe apresenta a análise técnica dos arquivos de configuração desenvolvidos, explicando a função de cada diretiva.
+
+\subsection{Orquestração: \texttt{compose.yml}}
+Este arquivo define a infraestrutura como código (IaC).
+\begin{itemize}
+    \item \textbf{Serviços (\texttt{services}):}
+    \begin{itemize}
+        \item \texttt{web}: Utiliza a imagem \texttt{nginx:latest}. A porta 8080 do host é mapeada para a 80 do contêiner. A dependência \texttt{depends\_on} garante que o proxy inicie apenas após as aplicações estarem prontas.
+        \item \texttt{petclinic}: Construído a partir de um \texttt{Dockerfile} local (contexto \texttt{./spring-petclinic}). Utiliza a variável de ambiente \texttt{SPRING\_PROFILES\_ACTIVE=postgres} definida no arquivo externo \texttt{config.env} para ativar o driver JDBC correto.
+    \end{itemize}
+    \item \textbf{Volumes (\texttt{volumes}):}
+    \begin{itemize}
+        \item Volumes nomeados como \texttt{moodle\_db\_data} e \texttt{petclinic\_db\_data} garantem a persistência dos dados. O Docker gerencia o local de armazenamento no host, protegendo os dados contra a exclusão acidental dos contêineres.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Construção da Aplicação Java: \texttt{Dockerfile}}
+O arquivo de construção do \texttt{petclinic} é um exemplo clássico e eficiente do padrão \textit{Multi-stage Build}. Esta técnica divide o processo de criação da imagem em fases distintas para otimizar o tamanho e a segurança do artefato final.
+
+\begin{lstlisting}[language=bash, caption=Dockerfile com Multi-stage Build]
+# Estágio 1: Build
+FROM eclipse-temurin:25-jdk AS build
+WORKDIR /workspace
+COPY . .
+RUN ./mvnw package -DskipTests
+
+# Estágio 2: Runtime
+FROM eclipse-temurin:25-jre
+WORKDIR /app
+COPY --from=build /workspace/target/*.jar app.jar
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dserver.servlet.context-path=/petclinic -jar /app/app.jar"]
+\end{lstlisting}
+
+\textbf{Explicação Técnica:}
+\begin{enumerate}
+    \item \textbf{Estágio de Compilação (\texttt{AS build}):} Inicia-se com uma imagem base completa (JDK 25), que contém compiladores e ferramentas de desenvolvimento. O código fonte é copiado e o Maven Wrapper (\texttt{mvnw}) é executado para compilar a aplicação e gerar o arquivo \texttt{.jar}. Note que este estágio é pesado, contendo código fonte e dependências de build.
+    
+    \item \textbf{Estágio de Execução (\texttt{Runtime}):} Inicia-se um novo estágio com uma imagem base minimalista (JRE 25), que contém apenas o ambiente de execução Java, sem compiladores.
+    
+    \item \textbf{Transferência de Artefato (\texttt{COPY --from=build}):} Apenas o arquivo compilado (\texttt{.jar}) é copiado do estágio anterior para a nova imagem. Todo o código fonte, cache do Maven e ferramentas de desenvolvimento são descartados.
+    
+    \item \textbf{Resultado:} Obtém-se uma imagem final significativamente menor e mais segura para produção, pois reduz a superfície de ataque ao não conter ferramentas desnecessárias.
+\end{enumerate}
+
+\subsection{Configuração do Proxy: \texttt{nginx.conf}}
+O arquivo define o comportamento do servidor de borda, com estratégias distintas para cada aplicação:
+
+\begin{itemize}
+    \item \textbf{Rota Petclinic:} A diretiva \texttt{proxy\_pass http://petclinic:8080;} encaminha o tráfego para o serviço Java. O uso do nome do serviço (\texttt{petclinic}) é resolvido pelo DNS interno do Docker.
+    
+    \item \textbf{Rota Moodle:} A diretiva \texttt{proxy\_pass http://moodle;} foi configurada \textbf{sem a barra final} (\textit{trailing slash}). 
+    \begin{itemize}
+        \item \textit{Justificativa Técnica:} Conforme observado nos arquivos de configuração, omitir a barra instrui o NGINX a anexar a URI original da requisição ao encaminhá-la para o upstream. Isso garante que requisições como \texttt{/moodle/login/index.php} sejam recebidas corretamente pelo container Apache interno.
+    \end{itemize}
+    
+    \item \textbf{Headers de Transparência:}
+    \begin{itemize}
+        \item \texttt{proxy\_set\_header Host \$http\_host}: Preserva o cabeçalho original, essencial para que a aplicação de backend saiba qual domínio o cliente acessou.
+        \item \texttt{X-Forwarded-For}: Adiciona o IP real do cliente à requisição, permitindo logs de auditoria corretos e controle de acesso baseado em IP na aplicação final.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Variáveis de Ambiente: \texttt{config.env}}
+Aderindo aos princípios da metodologia \textit{12-Factor App}, as configurações sensíveis foram externalizadas.
+\begin{itemize}
+    \item \texttt{POSTGRES\_URL}: Define a string de conexão JDBC, apontando para o hostname \texttt{petclinic-db}.
+    \item \texttt{WWWROOT}: Configuração crítica para o Moodle, informando-o de que ele está sendo acessado via \texttt{http://localhost:8080/moodle}, permitindo a geração correta de URLs absolutas para recursos estáticos (CSS/JS).
+\end{itemize}
+
+\section{Desafios e Soluções}
+Durante a implementação, a equipe deparou-se com desafios técnicos, especificamente relacionados ao \textit{Context Path}.
+
+\textbf{Problema:} As aplicações assumem nativamente a execução na raiz (\texttt{/}). Ao servi-las em subdiretórios (\texttt{/moodle} e \texttt{/petclinic}), links internos quebravam.
+
+\textbf{Solução:} Reconfiguração explícita:
+\begin{itemize}
+    \item \textbf{Java:} Adição da propriedade \texttt{-Dserver.servlet.context-path=/petclinic} no \texttt{ENTRYPOINT} do Dockerfile.
+    \item \textbf{Moodle:} Definição correta da variável \texttt{WWWROOT} no arquivo de ambiente, alinhada com a configuração do bloco \texttt{location} do NGINX.
+\end{itemize}
+
+\section{Conclusão e Trabalhos Futuros}
+A infraestrutura implementada cumpriu integralmente os requisitos propostos. A orquestração via Docker Compose garantiu um ambiente reprodutível e modular. A segmentação de redes demonstrou-se eficaz para a segurança, e a estratégia de \textit{multi-stage build} no Dockerfile da aplicação Petclinic assegurou uma entrega de software otimizada.
+
+Como trabalhos futuros, sugere-se a implementação de certificados SSL/TLS (HTTPS) para garantir a confidencialidade dos dados em trânsito.
+
+\end{document}

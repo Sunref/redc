@@ -8,3 +8,6 @@
 .devcrumbs
 server/data
 server/data/*
+
+/.gmm/*
+/.gmm

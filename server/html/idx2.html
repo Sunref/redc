@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Service Gateway - Apple Material Hybrid</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Fonts: Inter (SF Pro alternative) & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Material Symbols Rounded (styled to look like SF Symbols) -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300,0,0"
+    />
+
+    <!-- Devicon -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"
+    />
+
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: [
+                "Inter",
+                "-apple-system",
+                "BlinkMacSystemFont",
+                "sans-serif",
+              ],
+              mono: ["JetBrains Mono", "monospace"],
+            },
+            colors: {
+              ios: {
+                blue: "#007AFF",
+                green: "#34C759",
+                indigo: "#5856D6",
+                orange: "#FF9500",
+                red: "#FF3B30",
+                gray: "#8E8E93",
+                light: {
+                  bg: "#F5F5F7", // Apple System Gray 6 / Base
+                  card: "rgba(255, 255, 255, 0.72)",
+                  border: "rgba(0, 0, 0, 0.06)",
+                },
+                dark: {
+                  bg: "#000000",
+                  card: "rgba(28, 28, 30, 0.65)",
+                  border: "rgba(255, 255, 255, 0.12)",
+                },
+              },
+            },
+            backdropBlur: {
+              xs: "2px",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* --- Base & Reset --- */
+      body {
+        background-color: #f5f5f7;
+        color: #1d1d1f;
+        font-family: "Inter", sans-serif;
+        transition: background-color 0.4s ease, color 0.4s ease;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      html.dark body {
+        background-color: #000000;
+        color: #f5f5f7;
+      }
+
+      /* --- Glassmorphism Card (The "Merge") --- */
+      /* Uses M3 rounded corners but Apple materials */
+      .glass-card {
+        background-color: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 24px; /* Large radii like M3/iOS widgets */
+        box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.06);
+        transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1),
+          box-shadow 0.25s ease;
+      }
+
+      html.dark .glass-card {
+        background-color: rgba(30, 30, 32, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.3);
+      }
+
+      .glass-card:hover {
+        transform: scale(1.015);
+        box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.08);
+      }
+      html.dark .glass-card:hover {
+        box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.4);
+      }
+
+      /* --- Buttons --- */
+      .ios-btn {
+        height: 44px; /* Apple standard touch target */
+        border-radius: 22px;
+        padding: 0 24px;
+        font-weight: 600;
+        font-size: 15px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .ios-btn:active {
+        transform: scale(0.96);
+        opacity: 0.8;
+      }
+
+      /* Tonal equivalent (Gray) */
+      .ios-btn-secondary {
+        background-color: rgba(0, 0, 0, 0.06);
+        color: #1d1d1f;
+        backdrop-filter: blur(10px);
+      }
+      html.dark .ios-btn-secondary {
+        background-color: rgba(255, 255, 255, 0.12);
+        color: #ffffff;
+      }
+      .ios-btn-secondary:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+      html.dark .ios-btn-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.18);
+      }
+
+      /* Outline equivalent */
+      .ios-btn-outline {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        color: #007aff;
+        background: transparent;
+      }
+      html.dark .ios-btn-outline {
+        border-color: rgba(255, 255, 255, 0.25);
+        color: #0a84ff;
+      }
+      .ios-btn-outline:hover {
+        background-color: rgba(0, 122, 255, 0.05);
+      }
+
+      /* --- Icon Button --- */
+      .icon-btn-blur {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+      html.dark .icon-btn-blur {
+        background-color: rgba(50, 50, 50, 0.5);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      .icon-btn-blur:active {
+        transform: scale(0.92);
+      }
+
+      /* --- Typography --- */
+      h1,
+      h2,
+      h3 {
+        letter-spacing: -0.02em;
+      } /* Tight tracking typical of Apple */
+
+      /* --- 3D Canvas --- */
+      #canvas-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.4; /* Subtle background */
+      }
+
+      /* --- Utilities --- */
+      .material-symbols-rounded {
+        font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24; /* Thinner weight (300) like SF Symbols */
+      }
+
+      .hidden-modal {
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.92) translateY(10px);
+      }
+      .visible-modal {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1) translateY(0);
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+      } /* Hide scrollbar for cleaner look */
+    </style>
+  </head>
+  <body
+    class="min-h-screen flex flex-col relative overflow-x-hidden selection:bg-blue-500/30"
+  >
+    <!-- 3D Background -->
+    <div id="canvas-container"></div>
+
+    <!-- Theme Toggle -->
+    <div class="fixed top-6 right-6 z-50">
+      <button
+        onclick="cycleTheme()"
+        class="icon-btn-blur text-neutral-600 dark:text-neutral-200"
+        title="Toggle Theme"
+      >
+        <span
+          id="icon-sun"
+          class="material-symbols-rounded hidden"
+          style="font-size: 20px"
+          >light_mode</span
+        >
+        <span
+          id="icon-moon"
+          class="material-symbols-rounded hidden"
+          style="font-size: 20px"
+          >dark_mode</span
+        >
+        <span
+          id="icon-auto"
+          class="material-symbols-rounded hidden"
+          style="font-size: 20px"
+          >brightness_auto</span
+        >
+      </button>
+    </div>
+
+    <!-- Apple-style Pill Notification -->
+    <div
+      id="toast"
+      class="fixed top-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 -translate-y-4 transition-all duration-500 cubic-bezier(0.2, 1, 0.2, 1)"
+    >
+      <div
+        class="glass-card !rounded-full px-6 py-3 flex items-center gap-3 shadow-xl border border-white/40 dark:border-white/10"
+      >
+        <span class="material-symbols-rounded text-green-500 text-xl"
+          >check_circle</span
+        >
+        <span class="text-[13px] font-medium tracking-wide"
+          >Copiado para a área de transferência</span
+        >
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header class="relative z-10 w-full pt-28 pb-12 px-6 text-center">
+      <div
+        class="max-w-3xl mx-auto flex flex-col items-center animate-fade-in-up"
+      >
+        <!-- Status Pill (Glass) -->
+        <div
+          class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/50 dark:bg-white/10 backdrop-blur-md border border-black/5 dark:border-white/10 mb-8 shadow-sm"
+        >
+          <div
+            class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+          ></div>
+          <span
+            class="text-[11px] font-semibold tracking-wider uppercase text-neutral-500 dark:text-neutral-400"
+            >NGINX Operational</span
+          >
+        </div>
+
+        <!-- Headline -->
+        <h1
+          class="text-5xl md:text-7xl font-bold text-neutral-900 dark:text-white mb-6 tracking-tight drop-shadow-sm"
+        >
+          Redes de Computadores
+        </h1>
+
+        <p
+          class="text-lg md:text-xl text-neutral-500 dark:text-neutral-400 mb-10 max-w-xl mx-auto font-normal leading-relaxed"
+        >
+          Gateway de serviços orquestrados acessível via
+          <span
+            id="host-display"
+            class="font-mono text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md mx-1"
+            >...</span
+          >
+        </p>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="/main.pdf" target="_blank" class="ios-btn ios-btn-secondary">
+            <span class="material-symbols-rounded text-lg">description</span>
+            Documentação
+          </a>
+
+          <button onclick="openModal()" class="ios-btn ios-btn-outline">
+            <span class="material-symbols-rounded text-lg">groups</span>
+            Equipe
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main
+      class="relative z-10 flex-grow px-4 py-8 w-full max-w-5xl mx-auto flex flex-col gap-8"
+    >
+      <!-- Apps Grid -->
+      <div>
+        <div class="flex items-center gap-2 mb-4 px-2 opacity-60">
+          <span
+            class="text-xs font-bold tracking-widest uppercase text-neutral-500 dark:text-neutral-400"
+            >Aplicações</span
+          >
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Moodle Card -->
+          <a
+            id="moodle-link"
+            href="#"
+            target="_blank"
+            class="glass-card p-6 group flex flex-col h-full relative overflow-hidden"
+          >
+            <div
+              class="absolute top-6 right-6 opacity-40 group-hover:opacity-100 transition-opacity"
+            >
+              <span
+                class="material-symbols-rounded text-neutral-900 dark:text-white"
+                >arrow_outward</span
+              >
+            </div>
+
+            <div class="flex items-start gap-5 mb-6">
+              <div
+                class="w-[60px] h-[60px] bg-orange-50 dark:bg-orange-900/20 rounded-2xl flex items-center justify-center shrink-0 shadow-inner"
+              >
+                <i class="devicon-moodle-plain text-3xl text-orange-500"></i>
+              </div>
+              <div class="pt-1">
+                <h3
+                  class="text-xl font-semibold text-neutral-900 dark:text-white"
+                >
+                  Moodle
+                </h3>
+                <p
+                  class="text-sm text-neutral-500 dark:text-neutral-400 mt-1 font-medium"
+                >
+                  Virtual Learning Environment
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-2 mb-8">
+              <span
+                class="px-3 py-1 rounded-lg bg-neutral-100 dark:bg-white/10 text-[11px] font-semibold text-neutral-600 dark:text-neutral-300 backdrop-blur-sm"
+                >PHP 8.1</span
+              >
+            </div>
+
+            <div
+              class="mt-auto pt-5 border-t border-neutral-200/50 dark:border-white/10 flex justify-between items-center"
+            >
+              <div
+                class="flex gap-4 text-xs font-mono text-neutral-500 dark:text-neutral-400"
+              >
+                <span
+                  >user:
+                  <span class="text-neutral-800 dark:text-neutral-200"
+                    >admin</span
+                  ></span
+                >
+                <span
+                  >pass:
+                  <span class="text-neutral-800 dark:text-neutral-200"
+                    >admin123</span
+                  ></span
+                >
+              </div>
+              <div
+                class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.8)]"
+              ></div>
+            </div>
+          </a>
+
+          <!-- PetClinic Card -->
+          <a
+            id="petclinic-link"
+            href="#"
+            target="_blank"
+            class="glass-card p-6 group flex flex-col h-full relative overflow-hidden"
+          >
+            <div
+              class="absolute top-6 right-6 opacity-40 group-hover:opacity-100 transition-opacity"
+            >
+              <span
+                class="material-symbols-rounded text-neutral-900 dark:text-white"
+                >arrow_outward</span
+              >
+            </div>
+
+            <div class="flex items-start gap-5 mb-6">
+              <div
+                class="w-[60px] h-[60px] bg-green-50 dark:bg-green-900/20 rounded-2xl flex items-center justify-center shrink-0 shadow-inner"
+              >
+                <i class="devicon-spring-original text-3xl text-green-600"></i>
+              </div>
+              <div class="pt-1">
+                <h3
+                  class="text-xl font-semibold text-neutral-900 dark:text-white"
+                >
+                  PetClinic
+                </h3>
+                <p
+                  class="text-sm text-neutral-500 dark:text-neutral-400 mt-1 font-medium"
+                >
+                  Veterinary Management
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-2 mb-8">
+              <span
+                class="px-3 py-1 rounded-lg bg-neutral-100 dark:bg-white/10 text-[11px] font-semibold text-neutral-600 dark:text-neutral-300 backdrop-blur-sm"
+                >Java 17</span
+              >
+              <span
+                class="px-3 py-1 rounded-lg bg-neutral-100 dark:bg-white/10 text-[11px] font-semibold text-neutral-600 dark:text-neutral-300 backdrop-blur-sm"
+                >REST</span
+              >
+            </div>
+
+            <div
+              class="mt-auto pt-5 border-t border-neutral-200/50 dark:border-white/10 flex justify-between items-center"
+            >
+              <div
+                class="flex gap-4 text-xs font-mono text-neutral-500 dark:text-neutral-400"
+              >
+                <span>API Available</span>
+              </div>
+              <div
+                class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.8)]"
+              ></div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Data & Tech -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Data -->
+        <div class="lg:col-span-1 flex flex-col gap-4">
+          <div class="flex items-center gap-2 px-2 mt-2 opacity-60">
+            <span
+              class="text-xs font-bold tracking-widest uppercase text-neutral-500 dark:text-neutral-400"
+              >Dados</span
+            >
+          </div>
+
+          <div class="glass-card p-4 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <i class="devicon-postgresql-plain text-xl text-blue-500"></i>
+              <span
+                class="text-sm font-semibold text-neutral-900 dark:text-white"
+                >PostgreSQL</span
+              >
+            </div>
+            <div
+              onclick="copyToClipboard('pg-addr')"
+              class="cursor-pointer flex items-center justify-between bg-neutral-100/50 dark:bg-white/5 rounded-lg px-3 py-2.5 transition-colors hover:bg-neutral-200/50 dark:hover:bg-white/10"
+            >
+              <code
+                id="pg-addr"
+                class="text-[11px] font-mono truncate select-all opacity-70 text-neutral-700 dark:text-neutral-300"
+                >loading...</code
+              >
+              <span class="material-symbols-rounded text-base opacity-50"
+                >content_copy</span
+              >
+            </div>
+          </div>
+
+          <div class="glass-card p-4 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <i
+                class="devicon-mariadb-original text-xl text-neutral-600 dark:text-neutral-300"
+              ></i>
+              <span
+                class="text-sm font-semibold text-neutral-900 dark:text-white"
+                >MariaDB</span
+              >
+            </div>
+            <div
+              onclick="copyToClipboard('maria-addr')"
+              class="cursor-pointer flex items-center justify-between bg-neutral-100/50 dark:bg-white/5 rounded-lg px-3 py-2.5 transition-colors hover:bg-neutral-200/50 dark:hover:bg-white/10"
+            >
+              <code
+                id="maria-addr"
+                class="text-[11px] font-mono truncate select-all opacity-70 text-neutral-700 dark:text-neutral-300"
+                >loading...</code
+              >
+              <span class="material-symbols-rounded text-base opacity-50"
+                >content_copy</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="lg:col-span-2 flex flex-col gap-4">
+          <div class="flex items-center gap-2 px-2 mt-2 opacity-60">
+            <span
+              class="text-xs font-bold tracking-widest uppercase text-neutral-500 dark:text-neutral-400"
+              >Stack Tecnológica</span
+            >
+          </div>
+
+          <div class="glass-card h-full flex items-center justify-center">
+            <div class="flex flex-wrap justify-center gap-10 md:gap-16 p-8">
+              <div
+                class="flex flex-col items-center gap-3 group cursor-default transition-transform hover:scale-105"
+              >
+                <i
+                  class="devicon-nginx-original text-4xl text-neutral-400 dark:text-neutral-600 group-hover:text-green-600 transition-colors"
+                ></i>
+                <span
+                  class="text-[10px] font-bold tracking-widest text-neutral-400"
+                  >NGINX</span
+                >
+              </div>
+
+              <div
+                class="flex flex-col items-center gap-3 group cursor-default transition-transform hover:scale-105"
+              >
+                <i
+                  class="devicon-docker-plain text-4xl text-neutral-400 dark:text-neutral-600 group-hover:text-blue-600 transition-colors"
+                ></i>
+                <span
+                  class="text-[10px] font-bold tracking-widest text-neutral-400"
+                  >DOCKER</span
+                >
+              </div>
+
+              <div
+                class="flex flex-col items-center gap-3 group cursor-default transition-transform hover:scale-105"
+              >
+                <i
+                  class="devicon-spring-original text-4xl text-neutral-400 dark:text-neutral-600 group-hover:text-green-500 transition-colors"
+                ></i>
+                <span
+                  class="text-[10px] font-bold tracking-widest text-neutral-400"
+                  >SPRING</span
+                >
+              </div>
+
+              <div
+                class="flex flex-col items-center gap-3 group cursor-default transition-transform hover:scale-105"
+              >
+                <i
+                  class="devicon-apache-plain text-4xl text-neutral-400 dark:text-neutral-600 group-hover:text-red-600 transition-colors"
+                ></i>
+                <span
+                  class="text-[10px] font-bold tracking-widest text-neutral-400"
+                  >APACHE</span
+                >
+              </div>
+
+              <div
+                class="flex flex-col items-center gap-3 group cursor-default transition-transform hover:scale-105"
+              >
+                <div
+                  class="w-9 h-9 flex items-center justify-center font-bold text-lg bg-neutral-100 dark:bg-neutral-800 rounded-lg text-neutral-400 group-hover:text-cyan-600 transition-colors"
+                >
+                  t
+                </div>
+                <span
+                  class="text-[10px] font-bold tracking-widest text-neutral-400"
+                  >TYPST</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer
+      class="relative z-10 mt-12 border-t border-neutral-200/60 dark:border-white/10 bg-white/30 dark:bg-black/30 backdrop-blur-lg py-10"
+    >
+      <div
+        class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8"
+      >
+        <div class="flex items-center gap-4">
+          <div
+            class="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-2 shadow-sm border border-neutral-100"
+          >
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Logotipo_IFET.svg/1200px-Logotipo_IFET.svg.png"
+              alt="IFSP Logo"
+              class="w-full h-full object-contain opacity-90"
+            />
+          </div>
+          <div class="text-left">
+            <p class="text-sm font-semibold text-neutral-900 dark:text-white">
+              IFSP - SBV
+            </p>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400">
+              Ciência da Computação
+            </p>
+          </div>
+        </div>
+
+        <div class="text-center md:text-right space-y-2">
+          <div
+            class="text-[13px] font-medium text-neutral-600 dark:text-neutral-400"
+          >
+            Fernanda Martins &bull; Gabriel Maia &bull; Samuel Oliveira
+          </div>
+          <a
+            href="#"
+            class="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            <span class="material-symbols-rounded text-sm">code</span>
+            <span>GitHub Repo</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Apple Style Modal -->
+    <div
+      id="team-modal"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm hidden-modal transition-all duration-300 p-4"
+    >
+      <!-- Modal Content -->
+      <div
+        onclick="event.stopPropagation()"
+        class="glass-card w-full max-w-[340px] !p-0 shadow-2xl overflow-hidden flex flex-col"
+      >
+        <div
+          class="p-6 text-center border-b border-neutral-200/50 dark:border-white/10 bg-white/40 dark:bg-white/5"
+        >
+          <h3 class="text-lg font-semibold text-neutral-900 dark:text-white">
+            Colaboradores
+          </h3>
+          <p
+            class="text-[13px] text-neutral-500 dark:text-neutral-400 mt-1 leading-tight"
+          >
+            Engenharia de Redes
+          </p>
+        </div>
+
+        <div class="p-2 bg-white/30 dark:bg-black/20">
+          <div class="flex flex-col gap-1">
+            <!-- Item -->
+            <div
+              class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-colors cursor-default"
+            >
+              <div
+                class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white flex items-center justify-center font-medium text-xs shadow-md"
+              >
+                FM
+              </div>
+              <div class="flex-grow">
+                <div
+                  class="text-[15px] font-medium text-neutral-900 dark:text-white"
+                >
+                  Fernanda Silva
+                </div>
+              </div>
+            </div>
+            <!-- Item -->
+            <div
+              class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-colors cursor-default"
+            >
+              <div
+                class="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 text-white flex items-center justify-center font-medium text-xs shadow-md"
+              >
+                GM
+              </div>
+              <div class="flex-grow">
+                <div
+                  class="text-[15px] font-medium text-neutral-900 dark:text-white"
+                >
+                  Gabriel Maia
+                </div>
+              </div>
+            </div>
+            <!-- Item -->
+            <div
+              class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-colors cursor-default"
+            >
+              <div
+                class="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center font-medium text-xs shadow-md"
+              >
+                SO
+              </div>
+              <div class="flex-grow">
+                <div
+                  class="text-[15px] font-medium text-neutral-900 dark:text-white"
+                >
+                  Samuel Lopes
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="p-4 border-t border-neutral-200/50 dark:border-white/10 bg-white/40 dark:bg-white/5"
+        >
+          <button
+            onclick="closeModal()"
+            class="w-full py-2.5 rounded-xl bg-white dark:bg-white/10 text-neutral-900 dark:text-white font-semibold text-sm shadow-sm hover:bg-neutral-50 dark:hover:bg-white/20 transition-colors"
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- 3D Background (Softer, Apple-like subtle float) ---
+      let particleMaterial, lineMaterial;
+      let currentThemeState = "auto";
+
+      function init3DBackground() {
+        const container = document.getElementById("canvas-container");
+        if (!container) return;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000
+        );
+        camera.position.z = 50;
+
+        const renderer = new THREE.WebGLRenderer({
+          alpha: true,
+          antialias: true,
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const particleCount = 50; // Minimalist
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const velocities = [];
+
+        for (let i = 0; i < particleCount; i++) {
+          positions[i * 3] = (Math.random() - 0.5) * 120;
+          positions[i * 3 + 1] = (Math.random() - 0.5) * 120;
+          positions[i * 3 + 2] = (Math.random() - 0.5) * 60;
+          velocities.push({
+            x: (Math.random() - 0.5) * 0.03, // Slower, calmer movement
+            y: (Math.random() - 0.5) * 0.03,
+            z: (Math.random() - 0.5) * 0.01,
+          });
+        }
+        geometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(positions, 3)
+        );
+
+        particleMaterial = new THREE.PointsMaterial({
+          color: 0x8e8e93,
+          size: 0.8,
+          transparent: true,
+          opacity: 0.4,
+        });
+
+        lineMaterial = new THREE.LineBasicMaterial({
+          color: 0x8e8e93,
+          transparent: true,
+          opacity: 0.08,
+        });
+
+        const particles = new THREE.Points(geometry, particleMaterial);
+        group.add(particles);
+
+        update3DColors();
+
+        function animate() {
+          requestAnimationFrame(animate);
+          const positions = particles.geometry.attributes.position.array;
+          for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] += velocities[i].x;
+            positions[i * 3 + 1] += velocities[i].y;
+            positions[i * 3 + 2] += velocities[i].z;
+            if (Math.abs(positions[i * 3]) > 60) velocities[i].x *= -1;
+            if (Math.abs(positions[i * 3 + 1]) > 60) velocities[i].y *= -1;
+            if (Math.abs(positions[i * 3 + 2]) > 30) velocities[i].z *= -1;
+          }
+          particles.geometry.attributes.position.needsUpdate = true;
+          group.rotation.y += 0.0005;
+          renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener("resize", () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+      }
+
+      // --- Theme Logic ---
+      function initTheme() {
+        const savedTheme = localStorage.getItem("theme") || "auto";
+        setTheme(savedTheme);
+      }
+
+      function cycleTheme() {
+        let nextTheme;
+        if (currentThemeState === "light") nextTheme = "dark";
+        else if (currentThemeState === "dark") nextTheme = "auto";
+        else nextTheme = "light";
+        setTheme(nextTheme);
+      }
+
+      function setTheme(theme) {
+        currentThemeState = theme;
+        localStorage.setItem("theme", theme);
+
+        let visualTheme = theme;
+        if (theme === "auto") {
+          visualTheme = window.matchMedia("(prefers-color-scheme: dark)")
+            .matches
+            ? "dark"
+            : "light";
+        }
+
+        if (visualTheme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+
+        document.getElementById("icon-sun").classList.add("hidden");
+        document.getElementById("icon-moon").classList.add("hidden");
+        document.getElementById("icon-auto").classList.add("hidden");
+
+        if (theme === "light")
+          document.getElementById("icon-sun").classList.remove("hidden");
+        else if (theme === "dark")
+          document.getElementById("icon-moon").classList.remove("hidden");
+        else document.getElementById("icon-auto").classList.remove("hidden");
+
+        update3DColors();
+      }
+
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", (e) => {
+          if (currentThemeState === "auto") setTheme("auto");
+        });
+
+      function update3DColors() {
+        if (!particleMaterial || !lineMaterial) return;
+        const isDark = document.documentElement.classList.contains("dark");
+        // Light: Neutral Gray | Dark: Cool White/Blueish
+        const newColor = isDark ? 0xffffff : 0x8e8e93;
+        particleMaterial.color.setHex(newColor);
+        lineMaterial.color.setHex(newColor);
+
+        // Adjust opacity based on theme
+        particleMaterial.opacity = isDark ? 0.25 : 0.4;
+        lineMaterial.opacity = isDark ? 0.05 : 0.1;
+      }
+
+      // --- Main Init ---
+      document.addEventListener("DOMContentLoaded", () => {
+        init3DBackground();
+        initTheme();
+
+        const hostname = window.location.hostname;
+        const port = "8080";
+        const hostWithPort = `${hostname}:${port}`;
+
+        const hostDisplay = document.getElementById("host-display");
+        if (hostDisplay) hostDisplay.textContent = hostWithPort;
+
+        const protocol = window.location.protocol;
+        document.getElementById(
+          "moodle-link"
+        ).href = `${protocol}//${hostWithPort}/moodle/`;
+        document.getElementById(
+          "petclinic-link"
+        ).href = `${protocol}//${hostWithPort}/petclinic/`;
+
+        document.getElementById(
+          "pg-addr"
+        ).innerText = `jdbc:postgresql://${hostname}:5432/petclinic`;
+        document.getElementById(
+          "maria-addr"
+        ).innerText = `jdbc:mariadb://${hostname}:3306/moodle`;
+      });
+
+      // --- UI Actions ---
+      function openModal() {
+        const modal = document.getElementById("team-modal");
+        modal.classList.remove("hidden-modal");
+        modal.classList.add("visible-modal");
+      }
+
+      function closeModal() {
+        const modal = document.getElementById("team-modal");
+        modal.classList.remove("visible-modal");
+        modal.classList.add("hidden-modal");
+      }
+
+      document
+        .getElementById("team-modal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) closeModal();
+        });
+
+      function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        const text = element.innerText;
+
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(showToast);
+        } else {
+          const textArea = document.createElement("textarea");
+          textArea.value = text;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textArea);
+          showToast();
+        }
+      }
+
+      function showToast() {
+        const toast = document.getElementById("toast");
+        toast.classList.remove("opacity-0", "-translate-y-4");
+        setTimeout(() => {
+          toast.classList.add("opacity-0", "-translate-y-4");
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>

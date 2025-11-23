@@ -1,11 +1,1031 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Service Gateway - Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Three.js for 3D Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Fonte Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Phosphor Icons & Devicon -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"
+    />
+
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"],
+            },
+            colors: {
+              brand: {
+                50: "#eff6ff",
+                100: "#dbeafe",
+                400: "#60a5fa",
+                500: "#3b82f6",
+                600: "#2563eb",
+              },
+              dark: {
+                950: "#050505",
+                900: "#121212",
+                800: "#262626",
+                400: "#a1a1aa",
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* Base Styles */
+      body {
+        background-color: #f9fafb;
+        color: #0f172a;
+        -webkit-font-smoothing: antialiased;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      /* Dark Mode Overrides */
+      html.dark body {
+        background-color: #050505;
+        color: #f8fafc;
+      }
+
+      .panel {
+        background-color: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px);
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      html.dark .panel {
+        background-color: rgba(18, 18, 18, 0.6);
+        border-color: rgba(38, 38, 38, 0.6);
+        box-shadow: none;
+      }
+
+      .panel:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+      }
+      html.dark .panel:hover {
+        border-color: #525252;
+      }
+
+      .panel-hover-brand:hover {
+        border-color: #f97316;
+        box-shadow: 0 0 0 1px #f97316;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+
+      html.dark ::-webkit-scrollbar-track {
+        background: #0a0a0a;
+      }
+      html.dark ::-webkit-scrollbar-thumb {
+        background: #262626;
+        border-radius: 0;
+      }
+      html.dark ::-webkit-scrollbar-thumb:hover {
+        background: #404040;
+      }
+
+      .btn-secondary {
+        background-color: rgba(255, 255, 255, 0.8);
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        transition: all 0.2s;
+        backdrop-filter: blur(4px);
+      }
+      .btn-secondary:hover {
+        background-color: #f8fafc;
+        border-color: #94a3b8;
+        color: #0f172a;
+      }
+      html.dark .btn-secondary {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-color: #404040;
+        color: #e5e5e5;
+      }
+      html.dark .btn-secondary:hover {
+        border-color: #737373;
+        background-color: #262626;
+        color: #ffffff;
+      }
+
+      @keyframes pulse-subtle {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+      .animate-pulse-subtle {
+        animation: pulse-subtle 2s infinite;
+      }
+
+      #team-modal {
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+      }
+      #team-modal.hidden-modal {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      #team-modal.visible-modal {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      /* Canvas Container */
+      #canvas-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.4;
+        transition: opacity 0.5s ease;
+      }
+      html.dark #canvas-container {
+        opacity: 0.6;
+      }
+
+      /* Theme Icon Utilities */
+      .icon-active {
+        display: block;
+      }
+      .icon-inactive {
+        display: none;
+      }
+    </style>
   </head>
-  <body>
-    <h1>Docker Nginx está funcionando ✅</h1>
+  <body
+    class="min-h-screen flex flex-col relative bg-slate-50 dark:bg-dark-950 overflow-x-hidden transition-colors duration-300"
+  >
+    <!-- 3D Background Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Vignette Overlay -->
+    <div
+      class="fixed inset-0 pointer-events-none z-0 bg-gradient-to-t from-slate-50 via-transparent to-slate-50 dark:from-dark-950 dark:via-transparent dark:to-dark-950 opacity-80 transition-colors duration-300"
+    ></div>
+
+    <!-- Theme Toggle Button -->
+    <button
+      onclick="cycleTheme()"
+      class="fixed top-6 right-6 z-50 p-3 rounded-full bg-white/80 dark:bg-dark-800/80 backdrop-blur border border-slate-200 dark:border-dark-800 shadow-lg text-slate-600 dark:text-brand-400 hover:scale-110 transition-all duration-300 group"
+      title="Alternar Tema: Claro / Escuro / Auto"
+      id="theme-toggle-btn"
+    >
+      <!-- Icons controlled by JS -->
+      <i
+        id="icon-sun"
+        class="ph-fill ph-sun text-xl icon-inactive group-hover:rotate-90 transition-transform duration-500"
+      ></i>
+      <i
+        id="icon-moon"
+        class="ph-fill ph-moon text-xl icon-inactive group-hover:-rotate-12 transition-transform duration-300"
+      ></i>
+      <i
+        id="icon-auto"
+        class="ph-bold ph-desktop text-xl icon-inactive group-hover:scale-110 transition-transform duration-300"
+      ></i>
+    </button>
+
+    <!-- Toast Notification -->
+    <div
+      id="toast"
+      class="fixed top-20 right-6 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 rounded border border-slate-200 dark:border-slate-700 shadow-xl transform translate-x-[120%] opacity-0 transition-all duration-300 z-50 flex items-center gap-3 font-medium text-sm"
+    >
+      <i
+        class="ph-fill ph-check-circle text-green-600 dark:text-green-400 text-lg"
+      ></i>
+      <span>Copiado para a área de transferência</span>
+    </div>
+
+    <!-- Header -->
+    <header
+      class="relative z-10 w-full py-12 px-4 text-center border-b border-slate-200/50 dark:border-dark-800/50 bg-white/30 dark:bg-dark-900/30 backdrop-blur-md transition-colors duration-300"
+    >
+      <div class="max-w-3xl mx-auto flex flex-col items-center">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50/80 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 mb-6 animate-pulse-subtle backdrop-blur-sm transition-colors duration-300"
+        >
+          <div class="w-2 h-2 rounded-full bg-green-500"></div>
+          <span
+            class="text-green-600 dark:text-green-500 text-xs font-medium uppercase tracking-wide"
+            >NGINX Operacional</span
+          >
+        </div>
+
+        <h1
+          class="text-3xl md:text-5xl font-bold mb-4 text-slate-900 dark:text-white tracking-tight uppercase drop-shadow-sm transition-colors duration-300"
+        >
+          Projeto de Redes de Computadores
+        </h1>
+        <p
+          class="text-slate-600 dark:text-dark-400 text-lg mb-6 transition-colors duration-300"
+        >
+          Ambiente orquestrado acessível via
+          <span
+            id="host-display"
+            class="font-mono text-brand-600 dark:text-brand-400 bg-brand-50/50 dark:bg-brand-500/10 px-2 py-0.5 rounded text-base border border-brand-100 dark:border-transparent transition-colors duration-300"
+            >...</span
+          >
+        </p>
+
+        <div class="flex flex-wrap justify-center gap-3">
+          <a
+            href="/main.pdf"
+            target="_blank"
+            class="btn-secondary px-4 py-2 rounded text-sm font-medium flex items-center gap-2 group shadow-sm"
+          >
+            <i
+              class="ph-bold ph-file-pdf text-red-500 dark:text-red-400 group-hover:text-red-600 dark:group-hover:text-red-300"
+            ></i>
+            Documentação do Projeto
+          </a>
+
+          <button
+            onclick="openModal()"
+            class="btn-secondary px-4 py-2 rounded text-sm font-medium flex items-center gap-2 group shadow-sm"
+          >
+            <i
+              class="ph-bold ph-users text-brand-500 dark:text-brand-400 group-hover:text-brand-600 dark:group-hover:text-brand-300"
+            ></i>
+            Time de Engenharia
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main
+      class="relative z-10 flex-grow px-4 py-12 w-full max-w-7xl mx-auto flex flex-col gap-10"
+    >
+      <!-- Services Grid -->
+      <div>
+        <h2
+          class="text-sm font-bold text-slate-500 dark:text-dark-400 uppercase tracking-wider mb-4 flex items-center gap-2 backdrop-blur-sm inline-block px-2 rounded transition-colors duration-300"
+        >
+          <i class="ph-bold ph-app-window"></i> Aplicações
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Moodle Card -->
+          <a
+            id="moodle-link"
+            href="#"
+            target="_blank"
+            class="panel panel-hover-brand rounded-lg p-6 group relative overflow-hidden flex flex-col h-full"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 bg-slate-50 dark:bg-white rounded flex items-center justify-center shrink-0 border border-slate-100 dark:border-none transition-colors duration-300"
+                >
+                  <!-- Added explicit text-orange-500 class to keep the Moodle logo orange -->
+                  <i class="devicon-moodle-plain text-3xl text-orange-500"></i>
+                </div>
+                <div>
+                  <h3
+                    class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 transition-colors duration-300"
+                  >
+                    Moodle LMS
+                    <i
+                      class="ph-bold ph-arrow-up-right text-slate-400 dark:text-dark-400 text-sm group-hover:text-brand-500 transition-colors"
+                    ></i>
+                  </h3>
+                  <p
+                    class="text-sm text-slate-500 dark:text-dark-400 transition-colors duration-300"
+                  >
+                    Ambiente Virtual de Aprendizagem
+                  </p>
+                </div>
+              </div>
+              <span
+                class="px-2 py-1 bg-slate-100 dark:bg-dark-800 border border-slate-200 dark:border-dark-800 text-slate-600 dark:text-dark-400 text-xs font-mono rounded transition-colors duration-300"
+                >PHP 8.1</span
+              >
+            </div>
+
+            <div
+              class="mt-auto pt-4 border-t border-slate-100 dark:border-dark-800 transition-colors duration-300"
+            >
+              <div
+                class="flex items-center justify-between text-xs font-mono text-slate-500 dark:text-dark-400 transition-colors duration-300"
+              >
+                <div class="flex gap-4">
+                  <span
+                    >User:
+                    <strong
+                      class="text-slate-700 dark:text-white transition-colors duration-300"
+                      >admin</strong
+                    ></span
+                  >
+                  <span
+                    >Pass:
+                    <strong
+                      class="text-slate-700 dark:text-white transition-colors duration-300"
+                      >admin123</strong
+                    ></span
+                  >
+                </div>
+                <div
+                  class="flex items-center gap-1 text-green-600 dark:text-green-500"
+                >
+                  <i class="ph-fill ph-circle"></i> Online
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- PetClinic Card -->
+          <a
+            id="petclinic-link"
+            href="#"
+            target="_blank"
+            class="panel panel-hover-brand rounded-lg p-6 group relative overflow-hidden flex flex-col h-full"
+          >
+            <div class="flex justify-between items-start mb-4">
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 bg-slate-50 dark:bg-white rounded flex items-center justify-center shrink-0 border border-slate-100 dark:border-none transition-colors duration-300"
+                >
+                  <i
+                    class="devicon-spring-original text-3xl text-green-600"
+                  ></i>
+                </div>
+                <div>
+                  <h3
+                    class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 transition-colors duration-300"
+                  >
+                    PetClinic
+                    <i
+                      class="ph-bold ph-arrow-up-right text-slate-400 dark:text-dark-400 text-sm group-hover:text-brand-500 transition-colors"
+                    ></i>
+                  </h3>
+                  <p
+                    class="text-sm text-slate-500 dark:text-dark-400 transition-colors duration-300"
+                  >
+                    API REST & Gestão Veterinária
+                  </p>
+                </div>
+              </div>
+              <span
+                class="px-2 py-1 bg-slate-100 dark:bg-dark-800 border border-slate-200 dark:border-dark-800 text-slate-600 dark:text-dark-400 text-xs font-mono rounded transition-colors duration-300"
+                >Java 17</span
+              >
+            </div>
+
+            <div
+              class="mt-auto pt-4 border-t border-slate-100 dark:border-dark-800 transition-colors duration-300"
+            >
+              <div
+                class="flex items-center justify-between text-xs font-mono text-slate-500 dark:text-dark-400 transition-colors duration-300"
+              >
+                <div class="flex gap-2">
+                  <span
+                    class="px-1.5 py-0.5 bg-slate-100 dark:bg-dark-800 rounded transition-colors duration-300"
+                    >REST</span
+                  >
+                  <span
+                    class="px-1.5 py-0.5 bg-slate-100 dark:bg-dark-800 rounded transition-colors duration-300"
+                    >JPA</span
+                  >
+                </div>
+                <div
+                  class="flex items-center gap-1 text-green-600 dark:text-green-500"
+                >
+                  <i class="ph-fill ph-circle"></i> Online
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Data & Tech Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Database Column -->
+        <div class="lg:col-span-1 flex flex-col gap-4">
+          <h2
+            class="text-sm font-bold text-slate-500 dark:text-dark-400 uppercase tracking-wider flex items-center gap-2 backdrop-blur-sm inline-block px-2 rounded transition-colors duration-300"
+          >
+            <i class="ph-bold ph-database"></i> Banco de Dados
+          </h2>
+
+          <!-- Postgres -->
+          <div class="panel rounded-lg p-4 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <i
+                class="devicon-postgresql-plain text-2xl text-blue-500 dark:text-blue-400"
+              ></i>
+              <span
+                class="font-semibold text-slate-900 dark:text-white transition-colors duration-300"
+                >PostgreSQL</span
+              >
+              <span
+                class="ml-auto text-xs text-slate-500 dark:text-dark-400 font-mono bg-slate-100 dark:bg-dark-800 px-1.5 py-0.5 rounded transition-colors duration-300"
+                >:5432</span
+              >
+            </div>
+            <div
+              class="flex items-center justify-between bg-slate-50 dark:bg-black rounded border border-slate-200 dark:border-dark-800 p-2 group cursor-pointer transition-colors hover:border-slate-300"
+              onclick="copyToClipboard('pg-addr')"
+            >
+              <code
+                id="pg-addr"
+                class="text-xs text-slate-600 dark:text-dark-400 font-mono truncate select-all transition-colors duration-300"
+                >loading...</code
+              >
+              <i
+                class="ph-bold ph-copy text-slate-400 dark:text-dark-400 group-hover:text-slate-700 dark:group-hover:text-white transition-colors"
+              ></i>
+            </div>
+          </div>
+
+          <!-- MariaDB -->
+          <div class="panel rounded-lg p-4 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <i
+                class="devicon-mariadb-original text-2xl text-slate-800 dark:text-white transition-colors duration-300"
+              ></i>
+              <span
+                class="font-semibold text-slate-900 dark:text-white transition-colors duration-300"
+                >MariaDB</span
+              >
+              <span
+                class="ml-auto text-xs text-slate-500 dark:text-dark-400 font-mono bg-slate-100 dark:bg-dark-800 px-1.5 py-0.5 rounded transition-colors duration-300"
+                >:3306</span
+              >
+            </div>
+            <div
+              class="flex items-center justify-between bg-slate-50 dark:bg-black rounded border border-slate-200 dark:border-dark-800 p-2 group cursor-pointer transition-colors hover:border-slate-300"
+              onclick="copyToClipboard('maria-addr')"
+            >
+              <code
+                id="maria-addr"
+                class="text-xs text-slate-600 dark:text-dark-400 font-mono truncate select-all transition-colors duration-300"
+                >loading...</code
+              >
+              <i
+                class="ph-bold ph-copy text-slate-400 dark:text-dark-400 group-hover:text-slate-700 dark:group-hover:text-white transition-colors"
+              ></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tech Stack Column -->
+        <div class="lg:col-span-2">
+          <h2
+            class="text-sm font-bold text-slate-500 dark:text-dark-400 uppercase tracking-wider mb-4 flex items-center gap-2 backdrop-blur-sm inline-block px-2 rounded transition-colors duration-300"
+          >
+            <i class="ph-bold ph-stack"></i> Stack Tecnológica
+          </h2>
+          <div class="panel rounded-lg p-8">
+            <div
+              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8"
+            >
+              <div class="flex flex-col items-center gap-2 group" title="NGINX">
+                <i
+                  class="devicon-nginx-original text-4xl text-slate-300 dark:text-dark-400 group-hover:text-green-600 dark:group-hover:text-green-500 transition-colors grayscale group-hover:grayscale-0"
+                ></i>
+                <span
+                  class="text-xs font-mono text-slate-400 dark:text-dark-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors duration-300"
+                  >NGINX / Proxy</span
+                >
+              </div>
+
+              <div
+                class="flex flex-col items-center gap-2 group"
+                title="Docker"
+              >
+                <i
+                  class="devicon-docker-plain text-4xl text-slate-300 dark:text-dark-400 group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors grayscale group-hover:grayscale-0"
+                ></i>
+                <span
+                  class="text-xs font-mono text-slate-400 dark:text-dark-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors duration-300"
+                  >Docker / Runtime</span
+                >
+              </div>
+
+              <div
+                class="flex flex-col items-center gap-2 group"
+                title="Spring Boot"
+              >
+                <i
+                  class="devicon-spring-original text-4xl text-slate-300 dark:text-dark-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors grayscale group-hover:grayscale-0"
+                ></i>
+                <span
+                  class="text-xs font-mono text-slate-400 dark:text-dark-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors duration-300"
+                  >Spring / Backend</span
+                >
+              </div>
+
+              <div
+                class="flex flex-col items-center gap-2 group"
+                title="Apache"
+              >
+                <i
+                  class="devicon-apache-plain text-4xl text-slate-300 dark:text-dark-400 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors grayscale group-hover:grayscale-0"
+                ></i>
+                <span
+                  class="text-xs font-mono text-slate-400 dark:text-dark-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors duration-300"
+                  >Apache / HTTPd</span
+                >
+              </div>
+
+              <div class="flex flex-col items-center gap-2 group" title="Typst">
+                <div
+                  class="w-9 h-9 flex items-center justify-center font-bold text-lg bg-slate-100 dark:bg-dark-800 text-slate-400 dark:text-dark-400 rounded group-hover:text-cyan-600 dark:group-hover:text-cyan-400 group-hover:bg-cyan-50 dark:group-hover:bg-dark-900 border border-transparent group-hover:border-cyan-200 dark:group-hover:border-cyan-900 transition-all"
+                >
+                  t
+                </div>
+                <span
+                  class="text-xs font-mono text-slate-400 dark:text-dark-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors duration-300"
+                  >Typst / Docs</span
+                >
+              </div>
+
+              <div
+                class="flex flex-col items-center gap-2 group"
+                title="PostgreSQL"
+              >
+                <i
+                  class="devicon-postgresql-plain text-4xl text-slate-300 dark:text-dark-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors grayscale group-hover:grayscale-0"
+                ></i>
+                <span
+                  class="text-xs font-mono text-slate-400 dark:text-dark-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors duration-300"
+                  >Postgres / Data</span
+                >
+              </div>
+
+              <div
+                class="flex flex-col items-center gap-2 group"
+                title="MariaDB"
+              >
+                <i
+                  class="devicon-mariadb-original text-4xl text-slate-300 dark:text-dark-400 group-hover:text-slate-800 dark:group-hover:text-white transition-colors grayscale group-hover:grayscale-0"
+                ></i>
+                <span
+                  class="text-xs font-mono text-slate-400 dark:text-dark-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors duration-300"
+                  >MariaDB / Data</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer
+      class="relative z-10 mt-auto border-t border-slate-200 dark:border-dark-800 bg-slate-50/80 dark:bg-dark-900/80 backdrop-blur-md pt-8 pb-12 transition-colors duration-300"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6"
+      >
+        <a
+          href="https://www.sbv.ifsp.edu.br/bcc"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="text-decoration: none"
+        >
+          <div class="flex items-center gap-4" style="cursor: pointer">
+            <!-- Updated Logo Container: bg-slate-200 in light, bg-slate-950 in dark -->
+            <div
+              class="w-10 h-10 bg-slate-200 dark:bg-slate-950 rounded flex items-center justify-center shadow-sm border border-slate-200 dark:border-none p-1.5 transition-colors duration-300"
+            >
+              <!-- Logo is colored in light mode, and white in dark mode -->
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Logotipo_IFET.svg/1200px-Logotipo_IFET.svg.png"
+                alt="IFSP Logo"
+                class="w-full h-full object-contain dark:brightness-0 dark:invert opacity-90 hover:opacity-100 transition-all"
+              />
+            </div>
+            <div>
+              <p
+                class="text-slate-900 dark:text-white font-medium text-sm transition-colors duration-300"
+              >
+                IFSP - São João da Boa Vista
+              </p>
+              <p
+                class="text-slate-500 dark:text-dark-400 text-xs transition-colors duration-300"
+              >
+                Ciência da Computação
+              </p>
+            </div>
+          </div>
+        </a>
+
+        <div class="flex flex-col md:items-end gap-2 text-center md:text-right">
+          <div
+            class="text-sm font-medium text-slate-700 dark:text-white transition-colors duration-300"
+          >
+            <span
+              class="text-slate-400 dark:text-dark-400 text-xs font-mono mr-2 transition-colors duration-300"
+              >MAINTAINERS</span
+            >
+            Fernanda Martins da Silva &bull; Gabriel Maia Miguel &bull; Samuel
+            Oliveira Lopes
+          </div>
+
+          <a
+            href="#"
+            class="inline-flex items-center gap-2 text-xs text-slate-500 dark:text-dark-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+          >
+            <i class="ph-bold ph-github-logo text-lg"></i>
+            <span>Ver código no GitHub</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Team Modal -->
+    <div
+      id="team-modal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-sm hidden-modal p-4"
+    >
+      <div
+        class="bg-white dark:bg-dark-900 border border-slate-200 dark:border-dark-800 rounded-lg w-full max-w-2xl shadow-2xl overflow-hidden relative transition-colors duration-300"
+      >
+        <div
+          class="p-4 border-b border-slate-200 dark:border-dark-800 flex justify-between items-center bg-slate-50 dark:bg-dark-950 transition-colors duration-300"
+        >
+          <h3
+            class="text-slate-900 dark:text-white font-semibold transition-colors duration-300"
+          >
+            Colaboradores do Projeto
+          </h3>
+          <button
+            onclick="closeModal()"
+            class="text-slate-400 hover:text-slate-900 dark:text-dark-400 dark:hover:text-white transition-colors"
+          >
+            <i class="ph-bold ph-x text-lg"></i>
+          </button>
+        </div>
+
+        <div class="p-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div
+            class="panel p-4 rounded flex flex-col items-center text-center hover:border-brand-500/50 transition-colors"
+          >
+            <div
+              class="w-16 h-16 bg-slate-100 dark:bg-dark-800 rounded-full flex items-center justify-center mb-3 text-brand-600 dark:text-brand-500 font-bold border border-slate-200 dark:border-dark-800 shadow-sm dark:shadow-none transition-colors duration-300"
+            >
+              FM
+            </div>
+            <h4
+              class="text-slate-900 dark:text-white font-medium text-sm transition-colors duration-300"
+            >
+              Fernanda
+            </h4>
+            <p
+              class="text-slate-500 dark:text-dark-400 text-xs transition-colors duration-300"
+            >
+              Silva
+            </p>
+          </div>
+          <div
+            class="panel p-4 rounded flex flex-col items-center text-center hover:border-brand-500/50 transition-colors"
+          >
+            <div
+              class="w-16 h-16 bg-slate-100 dark:bg-dark-800 rounded-full flex items-center justify-center mb-3 text-brand-600 dark:text-brand-500 font-bold border border-slate-200 dark:border-dark-800 shadow-sm dark:shadow-none transition-colors duration-300"
+            >
+              GM
+            </div>
+            <h4
+              class="text-slate-900 dark:text-white font-medium text-sm transition-colors duration-300"
+            >
+              Gabriel
+            </h4>
+            <p
+              class="text-slate-500 dark:text-dark-400 text-xs transition-colors duration-300"
+            >
+              Maia
+            </p>
+          </div>
+          <div
+            class="panel p-4 rounded flex flex-col items-center text-center hover:border-brand-500/50 transition-colors"
+          >
+            <div
+              class="w-16 h-16 bg-slate-100 dark:bg-dark-800 rounded-full flex items-center justify-center mb-3 text-brand-600 dark:text-brand-500 font-bold border border-slate-200 dark:border-dark-800 shadow-sm dark:shadow-none transition-colors duration-300"
+            >
+              SO
+            </div>
+            <h4
+              class="text-slate-900 dark:text-white font-medium text-sm transition-colors duration-300"
+            >
+              Samuel
+            </h4>
+            <p
+              class="text-slate-500 dark:text-dark-400 text-xs transition-colors duration-300"
+            >
+              Lopes
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Global Variables for 3D Scene
+      let particleMaterial, lineMaterial;
+      let currentThemeState = "auto"; // 'light' | 'dark' | 'auto'
+
+      // 1. Theme Management
+      // Cycle: Light -> Dark -> Auto -> Light
+      function initTheme() {
+        const savedTheme = localStorage.getItem("theme") || "auto";
+        setTheme(savedTheme);
+      }
+
+      function cycleTheme() {
+        let nextTheme;
+        if (currentThemeState === "light") nextTheme = "dark";
+        else if (currentThemeState === "dark") nextTheme = "auto";
+        else nextTheme = "light"; // Auto -> Light
+
+        setTheme(nextTheme);
+      }
+
+      function setTheme(theme) {
+        currentThemeState = theme;
+        localStorage.setItem("theme", theme);
+
+        // Determine effective visual theme
+        let visualTheme = theme;
+        if (theme === "auto") {
+          visualTheme = window.matchMedia("(prefers-color-scheme: dark)")
+            .matches
+            ? "dark"
+            : "light";
+        }
+
+        // Apply Class
+        if (visualTheme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+
+        // Update Icon Visibility
+        const icons = {
+          light: document.getElementById("icon-sun"), // In light mode, show Sun to indicate "Switch to Dark"? No, standard is show current state icon or target state?
+          // Let's stick to showing icon representing the *current* state
+          // Light Mode -> Show Sun
+          // Dark Mode -> Show Moon
+          // Auto Mode -> Show Desktop
+          // Wait, standard UI is often: Show the icon of the mode you are IN.
+          // State Light -> Sun Icon visible
+          // State Dark -> Moon Icon visible
+          // State Auto -> Desktop Icon visible
+        };
+
+        document.getElementById("icon-sun").classList.add("icon-inactive");
+        document.getElementById("icon-sun").classList.remove("icon-active");
+        document.getElementById("icon-moon").classList.add("icon-inactive");
+        document.getElementById("icon-moon").classList.remove("icon-active");
+        document.getElementById("icon-auto").classList.add("icon-inactive");
+        document.getElementById("icon-auto").classList.remove("icon-active");
+
+        if (theme === "light") {
+          document.getElementById("icon-sun").classList.add("icon-active");
+          document.getElementById("icon-sun").classList.remove("icon-inactive");
+        } else if (theme === "dark") {
+          document.getElementById("icon-moon").classList.add("icon-active");
+          document
+            .getElementById("icon-moon")
+            .classList.remove("icon-inactive");
+        } else {
+          document.getElementById("icon-auto").classList.add("icon-active");
+          document
+            .getElementById("icon-auto")
+            .classList.remove("icon-inactive");
+        }
+
+        update3DColors();
+      }
+
+      // Listener for Auto Mode system changes
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", (e) => {
+          if (currentThemeState === "auto") {
+            // Re-apply auto logic
+            setTheme("auto");
+          }
+        });
+
+      // Updates 3D colors based on current class
+      function update3DColors() {
+        if (!particleMaterial || !lineMaterial) return;
+
+        const isDark = document.documentElement.classList.contains("dark");
+        // Dark Mode: Light Gray Particles | Light Mode: Dark Slate Particles
+        const newColor = isDark ? 0xaaaaaa : 0x334155;
+
+        particleMaterial.color.setHex(newColor);
+        lineMaterial.color.setHex(newColor);
+      }
+
+      // 2. 3D Background Script (Three.js)
+      function init3DBackground() {
+        const container = document.getElementById("canvas-container");
+        if (!container) return;
+
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000
+        );
+        camera.position.z = 50;
+
+        const renderer = new THREE.WebGLRenderer({
+          alpha: true,
+          antialias: true,
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const particleCount = 100;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const velocities = [];
+
+        for (let i = 0; i < particleCount; i++) {
+          positions[i * 3] = (Math.random() - 0.5) * 100;
+          positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+          positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
+
+          velocities.push({
+            x: (Math.random() - 0.5) * 0.05,
+            y: (Math.random() - 0.5) * 0.05,
+            z: (Math.random() - 0.5) * 0.02,
+          });
+        }
+
+        geometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(positions, 3)
+        );
+
+        // Materials (Globally accessible for updates)
+        particleMaterial = new THREE.PointsMaterial({
+          color: 0xaaaaaa, // Initial fallback
+          size: 0.5,
+          transparent: true,
+          opacity: 0.8,
+        });
+
+        lineMaterial = new THREE.LineBasicMaterial({
+          color: 0xaaaaaa, // Initial fallback
+          transparent: true,
+          opacity: 0.15,
+        });
+
+        const particles = new THREE.Points(geometry, particleMaterial);
+        group.add(particles);
+
+        // Initial Color Set
+        update3DColors();
+
+        function animate() {
+          requestAnimationFrame(animate);
+
+          const positions = particles.geometry.attributes.position.array;
+
+          for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] += velocities[i].x;
+            positions[i * 3 + 1] += velocities[i].y;
+            positions[i * 3 + 2] += velocities[i].z;
+
+            if (Math.abs(positions[i * 3]) > 50) velocities[i].x *= -1;
+            if (Math.abs(positions[i * 3 + 1]) > 50) velocities[i].y *= -1;
+            if (Math.abs(positions[i * 3 + 2]) > 25) velocities[i].z *= -1;
+          }
+          particles.geometry.attributes.position.needsUpdate = true;
+
+          group.rotation.y += 0.001;
+          group.rotation.x += 0.0005;
+
+          renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener("resize", () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        // Init 3D First
+        init3DBackground();
+        // Then Init Theme (which updates 3D colors)
+        initTheme();
+
+        const hostname = window.location.hostname;
+        const port = window.location.port;
+        const hostWithPort = port ? `${hostname}:${port}` : hostname;
+
+        const hostDisplay = document.getElementById("host-display");
+        if (hostDisplay) hostDisplay.textContent = hostWithPort;
+
+        const protocol = window.location.protocol;
+        document.getElementById(
+          "moodle-link"
+        ).href = `${protocol}//${hostWithPort}/moodle/`;
+        document.getElementById(
+          "petclinic-link"
+        ).href = `${protocol}//${hostWithPort}/petclinic/`;
+
+        document.getElementById(
+          "pg-addr"
+        ).innerText = `jdbc:postgresql://${hostname}:5432/petclinic`;
+        document.getElementById(
+          "maria-addr"
+        ).innerText = `jdbc:mariadb://${hostname}:3306/moodle`;
+      });
+
+      // Modal Controls
+      function openModal() {
+        document.getElementById("team-modal").classList.remove("hidden-modal");
+        document.getElementById("team-modal").classList.add("visible-modal");
+      }
+      function closeModal() {
+        document.getElementById("team-modal").classList.remove("visible-modal");
+        document.getElementById("team-modal").classList.add("hidden-modal");
+      }
+
+      // Clipboard
+      function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+
+        const text = element.innerText;
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(showToast);
+        } else {
+          const textArea = document.createElement("textarea");
+          textArea.value = text;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textArea);
+          showToast();
+        }
+      }
+
+      function showToast() {
+        const toast = document.getElementById("toast");
+        toast.classList.remove("translate-x-[120%]", "opacity-0");
+        setTimeout(() => {
+          toast.classList.add("translate-x-[120%]", "opacity-0");
+        }, 3000);
+      }
+    </script>
   </body>
 </html>

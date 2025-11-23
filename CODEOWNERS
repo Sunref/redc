@@ -5,7 +5,3 @@
 # All files inside spring-petclinic are owned by the Spring Community
 
 /server/spring-petclinic/\* @spring-projects
-
-# Exception: Dockerfile is not owned by the Spring Community
-
-!server/spring-petclinic/Dockerfile

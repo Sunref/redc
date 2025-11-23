@@ -62,7 +62,6 @@ services:
 
   petclinic:
     build:
-      context: ./spring-petclinic
       dockerfile: Dockerfile
     image: local/petclinic:latest
     container_name: petclinic

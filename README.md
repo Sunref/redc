@@ -28,8 +28,8 @@ Esta implementação demonstra uma infraestrutura de servidor web robusta, segur
 
 O projeto segue uma arquitetura onde o NGINX atua como o único ponto de entrada (Reverse Proxy) na porta 8080. Para garantir o "Princípio do Menor Privilégio", foram criadas duas redes internas isoladas:
 
-- **backend (Rede Java):** Conecta NGINX $\leftrightarrow$ Spring Petclinic $\leftrightarrow$ PostgreSQL.
-- **moodle_net (Rede PHP):** Conecta NGINX $\leftrightarrow$ Moodle $\leftrightarrow$ MariaDB.
+- **backend (Rede Java):** Conecta NGINX ↔ Spring Petclinic ↔ PostgreSQL.
+- **moodle_net (Rede PHP):** Conecta NGINX ↔ Moodle ↔ MariaDB.
 
 #### 📦 Pilha Tecnológica (Versões Exatas)
 

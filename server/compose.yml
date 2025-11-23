@@ -24,6 +24,8 @@ services:
     image: mariadb:10.6
     container_name: moodle-db
     restart: unless-stopped
+    ports:
+      - "3306:3306"
     networks:
       - moodle_net
     env_file:
@@ -51,6 +53,8 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    ports:
+      - "5432:5432"
     env_file:
       - ./config/config.env
     volumes:

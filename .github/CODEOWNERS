@@ -1,0 +1,11 @@
+# See https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+
+# CODEOWNERS file for REDC repository
+
+# All files inside spring-petclinic are owned by the Spring Community
+
+/server/spring-petclinic/\* @spring-projects
+
+# Exception: Dockerfile is not owned by the Spring Community
+
+!server/spring-petclinic/Dockerfile

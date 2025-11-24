@@ -1,28 +1,28 @@
 \documentclass[12pt, a4paper]{article}
 
-% --- BLOCO DE PREÂMBULO UNIVERSAL ---
+% --- BLOCO DE PREÂMBULO UNIVERSAL (Adaptado para o User) ---
 \usepackage[a4paper, top=3cm, bottom=2cm, left=3cm, right=2cm]{geometry}
 \usepackage{fontspec}
 
-% Configuração de Idioma (Português do Brasil) e Hifenização
+% Configuração de Idioma (Português do Brasil)
 \usepackage[brazilian, provide=*]{babel}
 \babelprovide[import, onchar=ids fonts]{brazilian}
 \babelprovide[import, onchar=ids fonts]{english}
 
-% Definição da Fonte Padrão (Noto Sans)
+% Definição da Fonte Padrão (Noto Sans é mandatório para compilação segura)
 \babelfont{rm}{Noto Sans}
 
 % Pacotes Adicionais
-\usepackage{enumitem}        
-\setlist[itemize]{label=-}   
-\usepackage{booktabs}        
-\usepackage{graphicx}        
-\usepackage{float}           
-\usepackage{listings}        
-\usepackage{xcolor}          
-\usepackage{titlesec}        
-\usepackage{hyperref}        
-\usepackage{microtype}       % Melhora a justificação do texto
+\usepackage{enumitem}
+\setlist[itemize]{label=-}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{microtype}
+\usepackage{hyperref}
 
 % Cores para Códigos
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -48,21 +48,21 @@
 
 % Estilo para Listings (Código)
 \lstdefinestyle{mystyle}{
-    backgroundcolor=\color{backcolour},   
+    backgroundcolor=\color{backcolour},
     commentstyle=\color{codegreen},
     keywordstyle=\color{codeblue},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{magenta},
     basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,          
-    breaklines=true,                  
-    captionpos=b,                     
-    keepspaces=true,                  
-    numbers=left,                     
-    numbersep=5pt,                    
-    showspaces=false,                 
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
     showstringspaces=false,
-    showtabs=false,                   
+    showtabs=false,
     tabsize=2,
     frame=single
 }
@@ -72,7 +72,7 @@
 \hypersetup{
     colorlinks=true,
     linkcolor=black,
-    filecolor=magenta,      
+    filecolor=magenta,
     urlcolor=blue,
     pdftitle={Implementação e Configuração de Servidor Web},
     pdfauthor={Fernanda Martins da Silva, Gabriel Maia Miguel, Samuel Oliveira Lopes},
@@ -83,29 +83,29 @@
 
 % --- CAPA ---
 \begin{titlepage}
-    \centering
-    {\Large \textbf{Instituto Federal de Educação, Ciência e Tecnologia de São Paulo}}\\[0.5cm]
-    {\large Campus São João da Boa Vista}\\[3cm]
-    
-    {\huge \textbf{Implementação e Configuração de um Servidor Web}}\\[0.5cm]
-    {\Large Abordagem Prática com Docker Compose, NGINX e Aplicações Open Source}\\[3cm]
-    
-    \textbf{Autores:}\\[0.5cm]
-    Fernanda Martins da Silva\\
-    Gabriel Maia Miguel\\
-    Samuel Oliveira Lopes\\[4cm]
-    
-    {\large \textbf{Relatório Técnico}}\\[0.5cm]
-    Unidade Curricular: Redes de Computadores\\[3cm]
-    
-    \vfill
-    Novembro de 2025
+	\centering
+	{\Large \textbf{Instituto Federal de Educação, Ciência e Tecnologia de São Paulo}}\\[0.5cm]
+	{\large Campus São João da Boa Vista}\\[3cm]
+
+	{\huge \textbf{Implementação e Configuração de um Servidor Web}}\\[0.5cm]
+	{\Large Abordagem Prática com Docker Compose, NGINX e Aplicações Open Source}\\[3cm]
+
+	\textbf{Autores:}\\[0.5cm]
+	Fernanda Martins da Silva\\
+	Gabriel Maia Miguel\\
+	Samuel Oliveira Lopes\\[4cm]
+
+	{\large \textbf{Relatório Técnico}}\\[0.5cm]
+	Unidade Curricular: Redes de Computadores\\[3cm]
+
+	\vfill
+	Novembro de 2025
 \end{titlepage}
 
 % --- RESUMO ---
 \thispagestyle{plain}
 \begin{center}
-    \Large \textbf{Resumo}
+	\Large \textbf{Resumo}
 \end{center}
 \vspace{0.5cm}
 
@@ -131,14 +131,14 @@ O objetivo primordial é demonstrar a implementação técnica de um servidor we
 \subsection{Objetivos Específicos}
 Para atingir o objetivo geral, a equipe definiu os seguintes passos:
 \begin{enumerate}
-    \item \textbf{Gestão de Dados:} Implementação e configuração de SGBDs relacionais distintos (MariaDB e PostgreSQL) em contêineres isolados.
-    \item \textbf{Aplicações Heterogêneas:}
-    \begin{itemize}
-        \item Hospedagem de uma aplicação Java Web (Spring Petclinic) utilizando as versões mais recentes do Java (v25).
-        \item Configuração de uma plataforma LMS (\textit{Learning Management System}) baseada em PHP (Moodle 4.5).
-    \end{itemize}
-    \item \textbf{Roteamento de Tráfego:} Configuração de um servidor NGINX atuando como Proxy Reverso para gerenciar as requisições na porta 8080 e distribuí-las pelos serviços internos.
-    \item \textbf{Documentação:} Elaboração técnica dos artefatos de configuração (\texttt{Dockerfile}, \texttt{compose.yml}, \texttt{nginx.conf}).
+	\item \textbf{Gestão de Dados:} Implementação e configuração de SGBDs relacionais distintos (MariaDB e PostgreSQL) em contêineres isolados.
+	\item \textbf{Aplicações Heterogêneas:}
+	      \begin{itemize}
+		      \item Hospedagem de uma aplicação Java Web (Spring Petclinic) utilizando as versões mais recentes do Java (v25).
+		      \item Configuração de uma plataforma LMS (\textit{Learning Management System}) baseada em PHP (Moodle 4.5).
+	      \end{itemize}
+	\item \textbf{Roteamento de Tráfego:} Configuração de um servidor NGINX atuando como Proxy Reverso para gerenciar as requisições na porta 8080 e distribuí-las pelos serviços internos.
+	\item \textbf{Documentação:} Elaboração técnica dos artefatos de configuração (\texttt{Dockerfile}, \texttt{compose.yml}, \texttt{nginx.conf}).
 \end{enumerate}
 
 \section{Fundamentação Teórica e Arquitetura}
@@ -148,21 +148,21 @@ A solução foi desenhada seguindo o padrão de arquitetura de microsserviços, 
 A escolha das tecnologias baseou-se na estabilidade, suporte da comunidade e conformidade com padrões \textit{open source}. A Tabela \ref{tab:versoes} resume a pilha tecnológica extraída dos arquivos de configuração.
 
 \begin{table}[ht]
-    \centering
-    \caption{Versões e Tecnologias Utilizadas}
-    \label{tab:versoes}
-    \vspace{0.2cm}
-    \begin{tabular}{lp{6cm}l}
-        \toprule
-        \textbf{Serviço} & \textbf{Tecnologia/Imagem} & \textbf{Papel no Sistema} \\
-        \midrule
-        \textit{Web Gateway} & \texttt{nginx:latest} & Proxy Reverso e Estáticos \\
-        LMS App & \texttt{brandkern/moodle:4.5-latest} & Plataforma de Ensino \\
-        LMS DB & \texttt{mariadb:10.6} & Persistência para o Moodle \\
-        Java App & \texttt{eclipse-temurin:25} (Custom) & Aplicação Spring Petclinic \\
-        Java DB & \texttt{postgres:15-alpine} & Persistência para o Petclinic \\
-        \bottomrule
-    \end{tabular}
+	\centering
+	\caption{Versões e Tecnologias Utilizadas}
+	\label{tab:versoes}
+	\vspace{0.2cm}
+	\begin{tabular}{lp{6cm}l}
+		\toprule
+		\textbf{Serviço}     & \textbf{Tecnologia/Imagem}           & \textbf{Papel no Sistema}     \\
+		\midrule
+		\textit{Web Gateway} & \texttt{nginx:latest}                & Proxy Reverso e Estáticos     \\
+		LMS App              & \texttt{brandkern/moodle:4.5-latest} & Plataforma de Ensino          \\
+		LMS DB               & \texttt{mariadb:10.6}                & Persistência para o Moodle    \\
+		Java App             & \texttt{eclipse-temurin:25} (Custom) & Aplicação Spring Petclinic    \\
+		Java DB              & \texttt{postgres:15-alpine}          & Persistência para o Petclinic \\
+		\bottomrule
+	\end{tabular}
 \end{table}
 
 \subsection{Topologia de Rede e Isolamento}
@@ -170,8 +170,8 @@ A escolha das tecnologias baseou-se na estabilidade, suporte da comunidade e con
 Um aspecto crítico da segurança em Docker é o isolamento de redes. Em vez de utilizar a rede padrão (\textit{default bridge}), foram criadas duas redes internas distintas para garantir que as bases de dados sejam acessíveis apenas pelas suas respectivas aplicações:
 
 \begin{itemize}
-    \item \textbf{\texttt{backend}}: Rede dedicada à pilha Java. Conecta exclusivamente o NGINX, a aplicação Petclinic e a base de dados PostgreSQL.
-    \item \textbf{\texttt{moodle\_net}}: Rede dedicada à pilha PHP. Conecta exclusivamente o NGINX, o Moodle e a base de dados MariaDB.
+	\item \textbf{\texttt{backend}}: Rede dedicada à pilha Java. Conecta exclusivamente o NGINX, a aplicação Petclinic e a base de dados PostgreSQL.
+	\item \textbf{\texttt{moodle\_net}}: Rede dedicada à pilha PHP. Conecta exclusivamente o NGINX, o Moodle e a base de dados MariaDB.
 \end{itemize}
 
 O contêiner \texttt{web} (NGINX) é o único elemento da arquitetura conectado a ambas as redes, atuando como uma ponte de aplicação (\textit{Application Layer Gateway}) segura entre o mundo externo e os serviços internos.
@@ -191,15 +191,15 @@ Nesta seção, a equipe apresenta a análise técnica dos arquivos de configura�
 \subsection{Orquestração: \texttt{compose.yml}}
 Este arquivo define a infraestrutura como código (IaC).
 \begin{itemize}
-    \item \textbf{Serviços (\texttt{services}):}
-    \begin{itemize}
-        \item \texttt{web}: Utiliza a imagem \texttt{nginx:latest}. A porta 8080 do host é mapeada para a 80 do contêiner. A dependência \texttt{depends\_on} garante que o proxy inicie apenas após as aplicações estarem prontas.
-        \item \texttt{petclinic}: Construído a partir de um \texttt{Dockerfile} local (contexto \texttt{./spring-petclinic}). Utiliza a variável de ambiente \texttt{SPRING\_PROFILES\_ACTIVE=postgres} definida no arquivo externo \texttt{config.env} para ativar o driver JDBC correto.
-    \end{itemize}
-    \item \textbf{Volumes (\texttt{volumes}):}
-    \begin{itemize}
-        \item Volumes nomeados como \texttt{moodle\_db\_data} e \texttt{petclinic\_db\_data} garantem a persistência dos dados. O Docker gerencia o local de armazenamento no host, protegendo os dados contra a exclusão acidental dos contêineres.
-    \end{itemize}
+	\item \textbf{Serviços (\texttt{services}):}
+	      \begin{itemize}
+		      \item \texttt{web}: Utiliza a imagem \texttt{nginx:latest}. A porta 8080 do host é mapeada para a 80 do contêiner. A dependência \texttt{depends\_on} garante que o proxy inicie apenas após as aplicações estarem prontas.
+		      \item \texttt{petclinic}: Construído a partir de um \texttt{Dockerfile} local (contexto \texttt{./spring-petclinic}). Utiliza a variável de ambiente \texttt{SPRING\_PROFILES\_ACTIVE=postgres} definida no arquivo externo \texttt{config.env} para ativar o driver JDBC correto.
+	      \end{itemize}
+	\item \textbf{Volumes (\texttt{volumes}):}
+	      \begin{itemize}
+		      \item Volumes nomeados como \texttt{moodle\_db\_data} e \texttt{petclinic\_db\_data} garantem a persistência dos dados. O Docker gerencia o local de armazenamento no host, protegendo os dados contra a exclusão acidental dos contêineres.
+	      \end{itemize}
 \end{itemize}
 
 \subsection{Construção da Aplicação Java: \texttt{Dockerfile}}
@@ -221,38 +221,38 @@ ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dserver.servlet.context-path=/petclini
 
 \textbf{Explicação Técnica:}
 \begin{enumerate}
-    \item \textbf{Estágio de Compilação (\texttt{AS build}):} Inicia-se com uma imagem base completa (JDK 25), que contém compiladores e ferramentas de desenvolvimento. O código fonte é copiado e o Maven Wrapper (\texttt{mvnw}) é executado para compilar a aplicação e gerar o arquivo \texttt{.jar}. Note que este estágio é pesado, contendo código fonte e dependências de build.
-    
-    \item \textbf{Estágio de Execução (\texttt{Runtime}):} Inicia-se um novo estágio com uma imagem base minimalista (JRE 25), que contém apenas o ambiente de execução Java, sem compiladores.
-    
-    \item \textbf{Transferência de Artefato (\texttt{COPY --from=build}):} Apenas o arquivo compilado (\texttt{.jar}) é copiado do estágio anterior para a nova imagem. Todo o código fonte, cache do Maven e ferramentas de desenvolvimento são descartados.
-    
-    \item \textbf{Resultado:} Obtém-se uma imagem final significativamente menor e mais segura para produção, pois reduz a superfície de ataque ao não conter ferramentas desnecessárias.
+	\item \textbf{Estágio de Compilação (\texttt{AS build}):} Inicia-se com uma imagem base completa (JDK 25), que contém compiladores e ferramentas de desenvolvimento. O código fonte é copiado e o Maven Wrapper (\texttt{mvnw}) é executado para compilar a aplicação e gerar o arquivo \texttt{.jar}. Note que este estágio é pesado, contendo código fonte e dependências de build.
+
+	\item \textbf{Estágio de Execução (\texttt{Runtime}):} Inicia-se um novo estágio com uma imagem base minimalista (JRE 25), que contém apenas o ambiente de execução Java, sem compiladores.
+
+	\item \textbf{Transferência de Artefato (\texttt{COPY --from=build}):} Apenas o arquivo compilado (\texttt{.jar}) é copiado do estágio anterior para a nova imagem. Todo o código fonte, cache do Maven e ferramentas de desenvolvimento são descartados.
+
+	\item \textbf{Resultado:} Obtém-se uma imagem final significativamente menor e mais segura para produção, pois reduz a superfície de ataque ao não conter ferramentas desnecessárias.
 \end{enumerate}
 
 \subsection{Configuração do Proxy: \texttt{nginx.conf}}
 O arquivo define o comportamento do servidor de borda, com estratégias distintas para cada aplicação:
 
 \begin{itemize}
-    \item \textbf{Rota Petclinic:} A diretiva \texttt{proxy\_pass http://petclinic:8080;} encaminha o tráfego para o serviço Java. O uso do nome do serviço (\texttt{petclinic}) é resolvido pelo DNS interno do Docker.
-    
-    \item \textbf{Rota Moodle:} A diretiva \texttt{proxy\_pass http://moodle;} foi configurada \textbf{sem a barra final} (\textit{trailing slash}). 
-    \begin{itemize}
-        \item \textit{Justificativa Técnica:} Conforme observado nos arquivos de configuração, omitir a barra instrui o NGINX a anexar a URI original da requisição ao encaminhá-la para o upstream. Isso garante que requisições como \texttt{/moodle/login/index.php} sejam recebidas corretamente pelo container Apache interno.
-    \end{itemize}
-    
-    \item \textbf{Headers de Transparência:}
-    \begin{itemize}
-        \item \texttt{proxy\_set\_header Host \$http\_host}: Preserva o cabeçalho original, essencial para que a aplicação de backend saiba qual domínio o cliente acessou.
-        \item \texttt{X-Forwarded-For}: Adiciona o IP real do cliente à requisição, permitindo logs de auditoria corretos e controle de acesso baseado em IP na aplicação final.
-    \end{itemize}
+	\item \textbf{Rota Petclinic:} A diretiva \texttt{proxy\_pass http://petclinic:8080;} encaminha o tráfego para o serviço Java. O uso do nome do serviço (\texttt{petclinic}) é resolvido pelo DNS interno do Docker.
+
+	\item \textbf{Rota Moodle:} A diretiva \texttt{proxy\_pass http://moodle;} foi configurada \textbf{sem a barra final} (\textit{trailing slash}).
+	      \begin{itemize}
+		      \item \textit{Justificativa Técnica:} Conforme observado nos arquivos de configuração, omitir a barra instrui o NGINX a anexar a URI original da requisição ao encaminhá-la para o upstream. Isso garante que requisições como \texttt{/moodle/login/index.php} sejam recebidas corretamente pelo container Apache interno.
+	      \end{itemize}
+
+	\item \textbf{Headers de Transparência:}
+	      \begin{itemize}
+		      \item \texttt{proxy\_set\_header Host \$http\_host}: Preserva o cabeçalho original, essencial para que a aplicação de backend saiba qual domínio o cliente acessou.
+		      \item \texttt{X-Forwarded-For}: Adiciona o IP real do cliente à requisição, permitindo logs de auditoria corretos e controle de acesso baseado em IP na aplicação final.
+	      \end{itemize}
 \end{itemize}
 
 \subsection{Variáveis de Ambiente: \texttt{config.env}}
 Aderindo aos princípios da metodologia \textit{12-Factor App}, as configurações sensíveis foram externalizadas.
 \begin{itemize}
-    \item \texttt{POSTGRES\_URL}: Define a string de conexão JDBC, apontando para o hostname \texttt{petclinic-db}.
-    \item \texttt{WWWROOT}: Configuração crítica para o Moodle, informando-o de que ele está sendo acessado via \texttt{http://localhost:8080/moodle}, permitindo a geração correta de URLs absolutas para recursos estáticos (CSS/JS).
+	\item \texttt{POSTGRES\_URL}: Define a string de conexão JDBC, apontando para o hostname \texttt{petclinic-db}.
+	\item \texttt{WWWROOT}: Configuração crítica para o Moodle, informando-o de que ele está sendo acessado via \texttt{http://localhost:8080/moodle}, permitindo a geração correta de URLs absolutas para recursos estáticos (CSS/JS).
 \end{itemize}
 
 \section{Desafios e Soluções}
@@ -262,13 +262,16 @@ Durante a implementação, a equipe deparou-se com desafios técnicos, especific
 
 \textbf{Solução:} Reconfiguração explícita:
 \begin{itemize}
-    \item \textbf{Java:} Adição da propriedade \texttt{-Dserver.servlet.context-path=/petclinic} no \texttt{ENTRYPOINT} do Dockerfile.
-    \item \textbf{Moodle:} Definição correta da variável \texttt{WWWROOT} no arquivo de ambiente, alinhada com a configuração do bloco \texttt{location} do NGINX.
+	\item \textbf{Java:} Adição da propriedade \texttt{-Dserver.servlet.context-path=/petclinic} no \texttt{ENTRYPOINT} do Dockerfile.
+	\item \textbf{Moodle:} Definição correta da variável \texttt{WWWROOT} no arquivo de ambiente, alinhada com a configuração do bloco \texttt{location} do NGINX.
 \end{itemize}
 
 \section{Conclusão e Trabalhos Futuros}
 A infraestrutura implementada cumpriu integralmente os requisitos propostos. A orquestração via Docker Compose garantiu um ambiente reprodutível e modular. A segmentação de redes demonstrou-se eficaz para a segurança, e a estratégia de \textit{multi-stage build} no Dockerfile da aplicação Petclinic assegurou uma entrega de software otimizada.
 
 Como trabalhos futuros, sugere-se a implementação de certificados SSL/TLS (HTTPS) para garantir a confidencialidade dos dados em trânsito.
+
+\vspace{0.5cm}
+\noindent\textbf{Repositório do Projeto:} \href{https://github.com/sunref/redc}{https://github.com/sunref/redc}
 
 \end{document}
